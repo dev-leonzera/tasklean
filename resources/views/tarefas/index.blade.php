@@ -234,7 +234,7 @@
                     <div class="col-md-6 col-lg-4 mb-4 tarefa-card" 
                          data-status="{{ $tarefa->status }}" 
                          data-projeto="{{ $tarefa->projeto_id }}"
-                         data-search="{{ strtolower($tarefa->titulo . ' ' . $tarefa->responsavel) }}">
+                         data-search="{{ strtolower($tarefa->titulo . ' ' . ($tarefa->responsavel->name ?? '')) }}">
                         <div class="card task-card {{ str_replace(' ', '-', $tarefa->status) }} h-100">
                             <div class="task-header">
                                 <h6 class="task-title">{{ Str::limit($tarefa->titulo, 30) }}</h6>
@@ -269,7 +269,7 @@
                                 
                                 <div class="task-info">
                                     <i class="bi bi-person"></i>
-                                    <span>{{ $tarefa->responsavel }}</span>
+                                    <span>{{ $tarefa->responsavel->name ?? 'Sem responsável' }}</span>
                                 </div>
                                 
                                 <div class="task-tags">

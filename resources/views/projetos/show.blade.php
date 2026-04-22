@@ -44,7 +44,7 @@
                             <i class="bi bi-person text-primary me-2"></i>
                             <span class="fw-semibold text-muted">Responsável</span>
                         </div>
-                        <p class="mb-0">{{ $projeto->responsavel }}</p>
+                        <p class="mb-0">{{ $projeto->responsavel->name ?? 'Sem responsável' }}</p>
                     </div>
                     <div class="info-item mb-3">
                         <div class="d-flex align-items-center mb-2">
@@ -150,7 +150,7 @@
                                                 {{ $statusLabels[$tarefa->status] }}
                                             </span>
                                         </td>
-                                        <td class="text-muted">{{ $tarefa->responsavel }}</td>
+                                        <td class="text-muted">{{ $tarefa->responsavel->name ?? 'Sem responsável' }}</td>
                                         <td>
                                             @if($tarefa->data_vencimento)
                                                 @if($tarefa->isAtrasada())

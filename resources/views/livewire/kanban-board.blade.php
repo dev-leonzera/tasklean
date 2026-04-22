@@ -55,10 +55,10 @@
                                             @endif
                                         </div>
                                         
-                                        @if($tarefa['responsavel'])
+                                        @if(isset($tarefa['responsavel']))
                                             <div class="mb-2">
                                                 <small class="text-muted">
-                                                    <i class="bi bi-person"></i> {{ $tarefa['responsavel'] }}
+                                                    <i class="bi bi-person"></i> {{ $tarefa['responsavel']['name'] ?? 'Sem responsável' }}
                                                 </small>
                                             </div>
                                         @endif
@@ -121,10 +121,10 @@
                                             @endif
                                         </div>
                                         
-                                        @if($tarefa['responsavel'])
+                                        @if(isset($tarefa['responsavel']))
                                             <div class="mb-2">
                                                 <small class="text-muted">
-                                                    <i class="bi bi-person"></i> {{ $tarefa['responsavel'] }}
+                                                    <i class="bi bi-person"></i> {{ $tarefa['responsavel']['name'] ?? 'Sem responsável' }}
                                                 </small>
                                             </div>
                                         @endif
@@ -192,10 +192,10 @@
                                             @endif
                                         </div>
                                         
-                                        @if($tarefa['responsavel'])
+                                        @if(isset($tarefa['responsavel']))
                                             <div class="mb-2">
                                                 <small class="text-muted">
-                                                    <i class="bi bi-person"></i> {{ $tarefa['responsavel'] }}
+                                                    <i class="bi bi-person"></i> {{ $tarefa['responsavel']['name'] ?? 'Sem responsável' }}
                                                 </small>
                                             </div>
                                         @endif
@@ -268,10 +268,10 @@
                                             @endif
                                         </div>
                                         
-                                        @if($tarefa['responsavel'])
+                                        @if(isset($tarefa['responsavel']))
                                             <div class="mb-2">
                                                 <small class="text-muted">
-                                                    <i class="bi bi-person"></i> {{ $tarefa['responsavel'] }}
+                                                    <i class="bi bi-person"></i> {{ $tarefa['responsavel']['name'] ?? 'Sem responsável' }}
                                                 </small>
                                             </div>
                                         @endif

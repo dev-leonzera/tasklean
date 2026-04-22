@@ -72,6 +72,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/check-notifications', [App\Http\Controllers\DashboardController::class, 'checkNotifications'])->name('dashboard.check-notifications');
     Route::post('/dashboard/mark-all-read', [App\Http\Controllers\DashboardController::class, 'markAllAsRead'])->name('dashboard.mark-all-read');
+    Route::post('/dashboard/dismiss-notification', [App\Http\Controllers\DashboardController::class, 'dismissNotification'])->name('dashboard.dismiss-notification');
 
     // Rota do Kanban (protegida por configuração)
     Route::get('/kanban', function () {

@@ -69,7 +69,7 @@
                             <i class="bi bi-person text-primary me-2"></i>
                             <span class="fw-semibold text-muted">Responsável</span>
                         </div>
-                        <p class="mb-0">{{ $tarefa->responsavel }}</p>
+                        <p class="mb-0">{{ $tarefa->responsavel->name ?? 'Sem responsável' }}</p>
                     </div>
                     <div class="info-item mb-3">
                         <div class="d-flex align-items-center mb-2">
@@ -198,7 +198,7 @@
             <div class="project-info-card">
                 <h6 class="fw-bold text-primary mb-2">{{ $tarefa->projeto->titulo }}</h6>
                 <p class="text-muted mb-3">
-                    <i class="bi bi-person me-1"></i>{{ $tarefa->projeto->responsavel }}
+                    <i class="bi bi-person me-1"></i>{{ $tarefa->projeto->responsavel->name ?? 'Sem responsável' }}
                 </p>
                 
                 <div class="d-flex justify-content-between align-items-center mb-3">

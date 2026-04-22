@@ -37,13 +37,13 @@ class DashboardController extends Controller
         // Tarefas atrasadas do usuário
         $tarefasAtrasadas = Tarefa::where('user_id', $user->id)
             ->atrasadas()
-            ->with('projeto')
+            ->with(['projeto', 'responsavel'])
             ->get();
         
         // Tarefas para hoje do usuário
         $tarefasParaHoje = Tarefa::where('user_id', $user->id)
             ->paraHoje()
-            ->with('projeto')
+            ->with(['projeto', 'responsavel'])
             ->orderBy('data_vencimento')
             ->get();
         
@@ -58,7 +58,7 @@ class DashboardController extends Controller
         
         // Tarefas recentes do usuário
         $tarefasRecentes = Tarefa::where('user_id', $user->id)
-            ->with('projeto')
+            ->with(['projeto', 'responsavel'])
             ->latest()
             ->take(5)
             ->get();
@@ -151,11 +151,46 @@ class DashboardController extends Controller
      */
     public function markAllAsRead()
     {
+        $notifications = session('notifications', []);
+        
+        foreach ($notifications as $notification) {
+            if (isset($notification['hash'])) {
+                NotificationHelper::dismiss($notification['hash']);
+            }
+        }
+
         NotificationHelper::clear();
         
         return response()->json([
             'success' => true,
             'message' => 'Todas as notificações foram marcadas como lidas'
+        ]);
+    }
+
+    /**
+     * Descarta uma notificação específica
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function dismissNotification(Request $request)
+    {
+        $hash = $request->input('hash');
+        
+        if ($hash) {
+            NotificationHelper::dismiss($hash);
+            
+            // Remover da sessão também
+            $notifications = session('notifications', []);
+            $notifications = array_filter($notifications, function($n) use ($hash) {
+                return ($n['hash'] ?? null) !== $hash;
+            });
+            session(['notifications' => $notifications]);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Notificação descartada'
         ]);
     }
 }

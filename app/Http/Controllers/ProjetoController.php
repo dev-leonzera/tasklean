@@ -16,7 +16,7 @@ class ProjetoController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Projeto::where('user_id', Auth::id())->with(['tarefas' => function($query) {
+        $query = Projeto::where('user_id', Auth::id())->with(['responsavel', 'tarefas' => function($query) {
             $query->where('user_id', Auth::id());
         }]);
         

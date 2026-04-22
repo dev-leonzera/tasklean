@@ -25,7 +25,7 @@ class KanbanBoard extends Component
 
     public function carregarTarefas()
     {
-        $query = Tarefa::where('user_id', Auth::id())->with('projeto');
+        $query = Tarefa::where('user_id', Auth::id())->with(['projeto', 'responsavel']);
         
         if ($this->projetoId) {
             $query->where('projeto_id', $this->projetoId);

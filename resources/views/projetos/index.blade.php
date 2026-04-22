@@ -209,7 +209,7 @@
         <div class="col-md-6 col-lg-4 mb-4">
             <div class="card project-card {{ $projeto->ativo ? 'active' : 'inactive' }} h-100" 
                  data-status="{{ $projeto->ativo ? 'ativo' : 'inativo' }}" 
-                 data-responsavel="{{ strtolower($projeto->responsavel) }}" 
+                 data-responsavel="{{ strtolower($projeto->responsavel->name ?? '') }}" 
                  data-titulo="{{ strtolower($projeto->titulo) }}">
                 <div class="project-header">
                     <h5 class="project-title">{{ $projeto->titulo }}</h5>
@@ -221,7 +221,7 @@
                 <div class="project-body">
                     <div class="project-info">
                         <i class="bi bi-person"></i>
-                        <span>{{ $projeto->responsavel }}</span>
+                        <span>{{ $projeto->responsavel->name ?? 'Sem responsável' }}</span>
                     </div>
                     
                     <div class="project-info">

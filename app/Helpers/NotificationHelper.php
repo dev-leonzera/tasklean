@@ -19,16 +19,30 @@ class NotificationHelper
      */
     public static function add(string $type, string $title, string $message, array $action = null): void
     {
+        // Gerar um hash único para esta notificação para persistência
+        $hash = md5($type . $title . substr($message, 0, 50));
+        
+        $user = Auth::user();
+        if ($user) {
+            $userSettings = \App\Models\UserSettings::getForUser($user->id);
+            $dismissed = $userSettings->dismissed_notifications ?? [];
+            
+            // Se já foi descartada, não adiciona novamente
+            if (in_array($hash, $dismissed)) {
+                return;
+            }
+        }
+
         $notifications = session('notifications', []);
         
-        // Verificar se já existe uma notificação similar (evitar duplicações)
-        $exists = collect($notifications)->contains(function ($notification) use ($type, $message) {
-            return $notification['type'] === $type && 
-                   str_contains($notification['message'], substr($message, 0, 50));
+        // Verificar se já existe uma notificação similar na sessão atual (evitar duplicações)
+        $exists = collect($notifications)->contains(function ($notification) use ($hash) {
+            return ($notification['hash'] ?? null) === $hash;
         });
         
         if (!$exists) {
             $notifications[] = [
+                'hash' => $hash,
                 'type' => $type,
                 'title' => $title,
                 'message' => $message,
@@ -38,6 +52,23 @@ class NotificationHelper
             ];
             
             session(['notifications' => $notifications]);
+        }
+    }
+
+    /**
+     * Descarta uma notificação permanentemente para o usuário
+     */
+    public static function dismiss(string $hash): void
+    {
+        $user = Auth::user();
+        if (!$user) return;
+
+        $userSettings = \App\Models\UserSettings::getForUser($user->id);
+        $dismissed = $userSettings->dismissed_notifications ?? [];
+        
+        if (!in_array($hash, $dismissed)) {
+            $dismissed[] = $hash;
+            $userSettings->update(['dismissed_notifications' => $dismissed]);
         }
     }
 
