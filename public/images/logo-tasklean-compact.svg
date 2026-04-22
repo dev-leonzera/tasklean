@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" width="120" height="40">
+  <defs>
+    <linearGradient id="compactGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="secondaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Ícone simplificado - Kanban -->
+  <g transform="translate(5, 8)">
+    <!-- Quadro base -->
+    <rect x="0" y="2" width="24" height="32" rx="2" ry="2" fill="url(#compactGradient)" opacity="0.1"/>
+    <rect x="0" y="2" width="24" height="32" rx="2" ry="2" fill="none" stroke="url(#compactGradient)" stroke-width="1.5"/>
+    
+    <!-- Colunas -->
+    <rect x="2" y="6" width="6" height="24" rx="1" fill="url(#secondaryGradient)" opacity="0.15"/>
+    <rect x="9" y="6" width="6" height="24" rx="1" fill="url(#compactGradient)" opacity="0.15"/>
+    <rect x="16" y="6" width="6" height="24" rx="1" fill="url(#compactGradient)" opacity="0.15"/>
+    
+    <!-- Cards -->
+    <rect x="3" y="8" width="4" height="3" rx="0.5" fill="url(#secondaryGradient)" opacity="0.8"/>
+    <rect x="10" y="8" width="4" height="3" rx="0.5" fill="url(#compactGradient)" opacity="0.8"/>
+    <rect x="17" y="8" width="4" height="3" rx="0.5" fill="url(#compactGradient)" opacity="0.8"/>
+    
+    <rect x="3" y="13" width="4" height="2" rx="0.5" fill="url(#secondaryGradient)" opacity="0.6"/>
+    <rect x="10" y="13" width="4" height="2" rx="0.5" fill="url(#compactGradient)" opacity="0.6"/>
+    <rect x="17" y="13" width="4" height="2" rx="0.5" fill="url(#compactGradient)" opacity="0.6"/>
+    
+    <rect x="10" y="17" width="4" height="2" rx="0.5" fill="url(#compactGradient)" opacity="0.4"/>
+    <rect x="17" y="17" width="4" height="2" rx="0.5" fill="url(#compactGradient)" opacity="0.4"/>
+    <rect x="17" y="21" width="4" height="2" rx="0.5" fill="url(#compactGradient)" opacity="0.3"/>
+    
+    <!-- Checkmarks -->
+    <circle cx="18.5" cy="9.5" r="0.8" fill="white"/>
+    <path d="M18 9.5 L18.5 10 L19 9.5" stroke="url(#compactGradient)" stroke-width="0.6" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Texto compacto -->
+  <g transform="translate(40, 12)">
+    <text x="0" y="12" font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif" font-size="14" font-weight="700" fill="url(#compactGradient)">
+      Tasklean
+    </text>
+    <rect x="0" y="16" width="70" height="1" rx="0.5" fill="url(#compactGradient)" opacity="0.3"/>
+  </g>
+</svg>
