@@ -5,249 +5,199 @@
 @section('content')
 <style>
     @media print {
-        .no-print {
-            display: none !important;
+        .no-print { display: none !important; }
+        body { background: white !important; }
+        .chart-container { 
+            box-shadow: none !important; 
+            border: 1px solid #eee !important;
+            margin-bottom: 2rem !important;
         }
-        body {
-            background: white;
-        }
-        .card {
-            border: none;
-            box-shadow: none;
-        }
-    }
-    .report-header {
-        border-bottom: 2px solid #3182ce;
-        padding-bottom: 1rem;
-        margin-bottom: 2rem;
-    }
-    .stat-card {
-        border-left: 4px solid #3182ce;
-        background: #f8f9fa;
+        .metric-card { border: 1px solid #eee !important; }
     }
 </style>
 
-<div class="no-print mb-4">
-    <div class="d-flex justify-content-between align-items-center">
+<div class="no-print mb-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
         <div>
-            <h1 class="h3 mb-1 fw-bold text-primary">
-                <i class="bi bi-list-task me-2"></i>Relatório de Tarefas
-            </h1>
-            <p class="text-muted mb-0">Gerado em {{ now()->format('d/m/Y H:i') }}</p>
+            <nav aria-label="breadcrumb" class="mb-2">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ route('relatorios.index') }}" class="text-decoration-none text-muted">Relatórios</a></li>
+                    <li class="breadcrumb-item active">Tarefas</li>
+                </ol>
+            </nav>
+            <h1 class="h2 mb-1 fw-800 text-dark">Relatório de Tarefas</h1>
+            <p class="text-muted mb-0">Listagem analítica e detalhada do backlog e progresso.</p>
         </div>
-        <div>
-            <button onclick="window.print()" class="btn btn-primary me-2">
-                <i class="bi bi-printer me-1"></i> Imprimir
+        <div class="d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-primary px-4 rounded-pill shadow-sm">
+                <i class="bi bi-printer me-2"></i> Imprimir / PDF
             </button>
-            <a href="{{ route('relatorios.index') }}" class="btn btn-secondary">
-                <i class="bi bi-arrow-left me-1"></i> Voltar
+            <a href="{{ route('relatorios.index') }}" class="btn btn-secondary px-4 rounded-pill">
+                <i class="bi bi-arrow-left me-2"></i> Voltar
             </a>
         </div>
     </div>
 </div>
 
-<!-- Cabeçalho do Relatório -->
-<div class="report-header">
-    <div class="row">
-        <div class="col-md-8">
-            <p class="text-muted mb-0">
-                @if($request->filled('projeto_id'))
-                    <strong>Projeto:</strong> {{ \App\Models\Projeto::find($request->projeto_id)->titulo ?? 'N/A' }}
-                @else
-                    <strong>Todos os projetos</strong>
-                @endif
-                @if($request->filled('status'))
-                    | <strong>Status:</strong> {{ ucfirst($request->status) }}
-                @endif
-                @if($request->filled('apenas_atrasadas') && $request->apenas_atrasadas)
-                    | <strong>Apenas atrasadas</strong>
-                @endif
-            </p>
+<!-- Header do Relatório -->
+<div class="chart-container mb-4 py-4 bg-light bg-opacity-50 border-0">
+    <div class="row align-items-center">
+        <div class="col-md-7">
+            <div class="d-flex align-items-center">
+                <div class="task-card-icon info me-3">
+                    <i class="bi bi-list-columns-reverse"></i>
+                </div>
+                <div>
+                    <h5 class="fw-800 text-dark mb-0">Inventário de Atividades</h5>
+                    <p class="text-muted small mb-0">Filtros: 
+                        <strong>{{ $request->projeto_id ? \App\Models\Projeto::find($request->projeto_id)->titulo : 'Todos Projetos' }}</strong>
+                        @if($request->status) | Status: {{ ucfirst($request->status) }} @endif
+                        @if($request->apenas_atrasadas) | <span class="text-danger fw-bold">Apenas Atrasadas</span> @endif
+                    </p>
+                </div>
+            </div>
         </div>
-        <div class="col-md-4 text-end">
-            <p class="mb-0"><strong>Usuário:</strong> {{ auth()->user()->name }}</p>
-            <p class="mb-0"><strong>Data:</strong> {{ now()->format('d/m/Y H:i') }}</p>
+        <div class="col-md-5 text-md-end">
+            <p class="mb-0 text-muted small">Gerado por <strong>{{ auth()->user()->name }}</strong></p>
+            <p class="mb-0 text-muted small">Data: {{ now()->format('d/m/Y H:i') }}</p>
         </div>
     </div>
 </div>
 
-<!-- Estatísticas -->
-<div class="row mb-4">
-    <div class="col-md-3 mb-3">
-        <div class="card stat-card">
-            <div class="card-body">
-                <h6 class="text-muted mb-2">Total de Tarefas</h6>
-                <h3 class="mb-0">{{ $estatisticas['total'] }}</h3>
-            </div>
+<!-- Métricas -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="metric-card p-4 h-100">
+            <div class="text-muted small fw-bold text-uppercase mb-2">Total Tarefas</div>
+            <div class="h2 fw-800 text-dark mb-0">{{ $estatisticas['total'] }}</div>
         </div>
     </div>
-    <div class="col-md-3 mb-3">
-        <div class="card stat-card" style="border-left-color: #6c757d;">
-            <div class="card-body">
-                <h6 class="text-muted mb-2">Backlog</h6>
-                <h3 class="mb-0 text-secondary">{{ $estatisticas['backlog'] }}</h3>
-            </div>
+    <div class="col-md-3">
+        <div class="metric-card p-4 h-100">
+            <div class="text-muted small fw-bold text-uppercase mb-2">Backlog / Pendentes</div>
+            <div class="h2 fw-800 text-warning mb-0">{{ $estatisticas['backlog'] + $estatisticas['pendentes'] }}</div>
         </div>
     </div>
-    <div class="col-md-3 mb-3">
-        <div class="card stat-card" style="border-left-color: #ed8936;">
-            <div class="card-body">
-                <h6 class="text-muted mb-2">Em Desenvolvimento</h6>
-                <h3 class="mb-0 text-warning">{{ $estatisticas['em_desenvolvimento'] }}</h3>
-            </div>
+    <div class="col-md-3">
+        <div class="metric-card p-4 h-100">
+            <div class="text-muted small fw-bold text-uppercase mb-2">Concluídas</div>
+            <div class="h2 fw-800 text-success mb-0">{{ $estatisticas['concluidas'] }}</div>
         </div>
     </div>
-    <div class="col-md-3 mb-3">
-        <div class="card stat-card" style="border-left-color: #10b981;">
-            <div class="card-body">
-                <h6 class="text-muted mb-2">Concluídas</h6>
-                <h3 class="mb-0 text-success">{{ $estatisticas['concluidas'] }}</h3>
-            </div>
+    <div class="col-md-3">
+        <div class="metric-card p-4 h-100 border-danger bg-soft-danger bg-opacity-10">
+            <div class="text-danger small fw-bold text-uppercase mb-2">Atrasadas</div>
+            <div class="h2 fw-800 text-danger mb-0">{{ $estatisticas['atrasadas'] }}</div>
         </div>
     </div>
 </div>
 
-@if($estatisticas['atrasadas'] > 0)
-<div class="alert alert-danger mb-4">
-    <i class="bi bi-exclamation-triangle me-2"></i>
-    <strong>Atenção:</strong> {{ $estatisticas['atrasadas'] }} tarefa(s) atrasada(s) encontrada(s)
-</div>
-@endif
-
-<!-- Tabela de Tarefas -->
-<div class="card">
-    <div class="card-header bg-white">
-        <h5 class="mb-0">Detalhamento das Tarefas</h5>
+<!-- Tabela -->
+<div class="chart-container p-0 overflow-hidden mb-5">
+    <div class="p-4 border-bottom bg-light bg-opacity-50 d-flex justify-content-between align-items-center">
+        <h6 class="fw-800 text-dark mb-0">Listagem Detalhada</h6>
+        @if($estatisticas['atrasadas'] > 0)
+            <span class="badge bg-danger rounded-pill px-3 py-2 fw-bold shadow-sm">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> Atenção: {{ $estatisticas['atrasadas'] }} em atraso
+            </span>
+        @endif
     </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr class="bg-light bg-opacity-50">
+                    <th class="ps-4 py-3 fw-800 text-muted small text-uppercase">Título / Descrição</th>
+                    <th class="py-3 fw-800 text-muted small text-uppercase">Projeto</th>
+                    <th class="py-3 fw-800 text-muted small text-uppercase">Status</th>
+                    <th class="py-3 fw-800 text-muted small text-uppercase">Responsável</th>
+                    <th class="pe-4 py-3 fw-800 text-muted small text-uppercase text-end">Vencimento</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($tarefas as $tarefa)
                     <tr>
-                        <th>Tarefa</th>
-                        <th>Projeto</th>
-                        <th>Status</th>
-                        <th>Responsável</th>
-                        <th>Data Criação</th>
-                        <th>Data Vencimento</th>
-                        <th>Situação</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($tarefas as $tarefa)
-                        <tr>
-                            <td>
-                                <strong>{{ $tarefa->titulo }}</strong>
-                                @if($tarefa->descricao)
-                                    <br><small class="text-muted">{{ \Illuminate\Support\Str::limit($tarefa->descricao, 50) }}</small>
-                                @endif
-                            </td>
-                            <td>{{ $tarefa->projeto->titulo ?? '-' }}</td>
-                            <td>
-                                @php
-                                    $statusBadges = [
-                                        'backlog' => ['bg' => 'secondary', 'text' => 'Backlog'],
-                                        'pendente' => ['bg' => 'warning', 'text' => 'Pendente'],
-                                        'em desenvolvimento' => ['bg' => 'info', 'text' => 'Em Desenvolvimento'],
-                                        'concluida' => ['bg' => 'success', 'text' => 'Concluída'],
-                                    ];
-                                    $status = $statusBadges[$tarefa->status] ?? ['bg' => 'secondary', 'text' => ucfirst($tarefa->status)];
-                                @endphp
-                                <span class="badge bg-{{ $status['bg'] }}">{{ $status['text'] }}</span>
-                            </td>
-                            <td>{{ $tarefa->responsavel ?? '-' }}</td>
-                            <td>{{ $tarefa->data_criacao ? $tarefa->data_criacao->format('d/m/Y') : '-' }}</td>
-                            <td>
-                                @if($tarefa->data_vencimento)
+                        <td class="ps-4">
+                            <div class="fw-bold text-dark">{{ $tarefa->titulo }}</div>
+                            @if($tarefa->descricao)
+                                <div class="text-muted small text-truncate" style="max-width: 300px;">{{ $tarefa->descricao }}</div>
+                            @endif
+                        </td>
+                        <td>
+                            <span class="fw-semibold text-dark">{{ $tarefa->projeto->titulo ?? '-' }}</span>
+                        </td>
+                        <td>
+                            @php
+                                $statusColor = match($tarefa->status) {
+                                    'backlog' => 'secondary',
+                                    'pendente' => 'warning',
+                                    'em desenvolvimento' => 'info',
+                                    'concluida' => 'success',
+                                    default => 'primary'
+                                };
+                            @endphp
+                            <span class="badge-premium {{ $statusColor }} py-1 px-3" style="font-size: 0.65rem;">
+                                {{ strtoupper($tarefa->status) }}
+                            </span>
+                        </td>
+                        <td>{{ $tarefa->responsavel ?? 'Não atribuída' }}</td>
+                        <td class="pe-4 text-end">
+                            @if($tarefa->data_vencimento)
+                                <div class="fw-bold {{ $tarefa->isAtrasada() ? 'text-danger' : 'text-dark' }}">
                                     {{ $tarefa->data_vencimento->format('d/m/Y') }}
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
-                            </td>
-                            <td>
+                                </div>
                                 @if($tarefa->isAtrasada())
-                                    <span class="badge bg-danger">Atrasada</span>
-                                @elseif($tarefa->isParaHoje())
-                                    <span class="badge bg-warning">Vence Hoje</span>
-                                @elseif($tarefa->isConcluida())
-                                    <span class="badge bg-success">Concluída</span>
-                                @else
-                                    <span class="badge bg-info">Em Andamento</span>
+                                    <span class="badge bg-soft-danger text-danger rounded-pill px-2 py-0.5" style="font-size: 0.6rem;">ATRASADA</span>
                                 @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">
-                                <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-                                <p class="mt-2 mb-0">Nenhuma tarefa encontrada com os filtros aplicados</p>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <p class="text-muted mb-0">Nenhuma tarefa encontrada para os critérios informados.</p>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
 
-<!-- Gráfico de Distribuição -->
-@if($tarefas->count() > 0)
-<div class="row mt-4">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-white">
-                <h6 class="mb-0">Distribuição por Status</h6>
-            </div>
-            <div class="card-body">
-                <canvas id="statusChart" height="200"></canvas>
+<div class="row g-4">
+    <div class="col-lg-6 no-print">
+        <div class="chart-container h-100">
+            <h6 class="fw-800 text-dark mb-4">Volume por Status</h6>
+            <div style="height: 250px;">
+                <canvas id="statusChart"></canvas>
             </div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-white">
-                <h6 class="mb-0">Resumo</h6>
-            </div>
-            <div class="card-body">
-                <ul class="list-unstyled mb-0">
-                    <li class="mb-2">
-                        <div class="d-flex justify-content-between">
-                            <span>Backlog:</span>
-                            <strong>{{ $estatisticas['backlog'] }}</strong>
+    <div class="col-lg-6">
+        <div class="chart-container">
+            <h6 class="fw-800 text-dark mb-4">Resumo Executivo</h6>
+            <div class="activity-list">
+                @php
+                    $summaryItems = [
+                        ['label' => 'Aguardando Início', 'count' => $estatisticas['backlog'] + $estatisticas['pendentes'], 'color' => 'warning'],
+                        ['label' => 'Em Produção', 'count' => $estatisticas['em_desenvolvimento'], 'color' => 'info'],
+                        ['label' => 'Finalizadas', 'count' => $estatisticas['concluidas'], 'color' => 'success'],
+                        ['label' => 'Críticas (Atrasadas)', 'count' => $estatisticas['atrasadas'], 'color' => 'danger'],
+                    ];
+                @endphp
+                @foreach($summaryItems as $item)
+                    <div class="activity-item bg-light bg-opacity-50 p-3 rounded-4 mb-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-dark">{{ $item['label'] }}</span>
+                            <span class="h6 fw-800 text-{{ $item['color'] }} mb-0">{{ $item['count'] }}</span>
                         </div>
-                    </li>
-                    <li class="mb-2">
-                        <div class="d-flex justify-content-between">
-                            <span>Pendentes:</span>
-                            <strong>{{ $estatisticas['pendentes'] }}</strong>
-                        </div>
-                    </li>
-                    <li class="mb-2">
-                        <div class="d-flex justify-content-between">
-                            <span>Em Desenvolvimento:</span>
-                            <strong>{{ $estatisticas['em_desenvolvimento'] }}</strong>
-                        </div>
-                    </li>
-                    <li class="mb-2">
-                        <div class="d-flex justify-content-between">
-                            <span>Concluídas:</span>
-                            <strong class="text-success">{{ $estatisticas['concluidas'] }}</strong>
-                        </div>
-                    </li>
-                    @if($estatisticas['atrasadas'] > 0)
-                    <li class="mb-2">
-                        <div class="d-flex justify-content-between">
-                            <span class="text-danger">Atrasadas:</span>
-                            <strong class="text-danger">{{ $estatisticas['atrasadas'] }}</strong>
-                        </div>
-                    </li>
-                    @endif
-                </ul>
+                    </div>
+                @endforeach
             </div>
         </div>
     </div>
 </div>
-@endif
 @endsection
 
 @section('scripts')
@@ -257,9 +207,9 @@
     const ctx = document.getElementById('statusChart');
     if (ctx) {
         new Chart(ctx, {
-            type: 'doughnut',
+            type: 'bar',
             data: {
-                labels: ['Backlog', 'Pendentes', 'Em Desenvolvimento', 'Concluídas'],
+                labels: ['Backlog', 'Pendente', 'Em Dev', 'Concluída'],
                 datasets: [{
                     data: [
                         {{ $estatisticas['backlog'] }},
@@ -267,16 +217,23 @@
                         {{ $estatisticas['em_desenvolvimento'] }},
                         {{ $estatisticas['concluidas'] }}
                     ],
-                    backgroundColor: ['#6c757d', '#ed8936', '#3182ce', '#10b981']
+                    backgroundColor: ['#cbd5e1', '#fbbf24', '#38bdf8', '#34d399'],
+                    borderRadius: 8
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { display: false } },
+                    x: { grid: { display: false } }
+                }
             }
         });
     }
     @endif
 </script>
 @endsection
-

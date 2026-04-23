@@ -4,47 +4,52 @@
 @section('page-title', 'Relatórios')
 
 @section('content')
-<div class="row mb-4">
+<!-- Page Header -->
+<div class="row mb-5">
     <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3">
             <div>
-                <h1 class="h3 mb-1 fw-bold text-primary">
-                    <i class="bi bi-file-earmark-text me-2"></i>Relatórios
+                <h1 class="h2 mb-1 fw-800 text-dark">
+                    Central de Inteligência 📊
                 </h1>
-                <p class="text-muted mb-0">Gere relatórios detalhados dos seus projetos e tarefas</p>
+                <p class="text-muted mb-0">Extraia insights, analise o desempenho e gere documentos oficiais.</p>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row">
+<div class="row g-4">
     <!-- Relatório de Projetos -->
-    <div class="col-lg-6 col-md-6 mb-4">
-        <div class="card h-100 card-hover">
-            <div class="card-body text-center">
-                <div class="mb-3">
-                    <i class="bi bi-folder text-success" style="font-size: 3rem;"></i>
+    <div class="col-lg-6">
+        <div class="chart-container h-100 d-flex flex-column p-0 overflow-hidden border-0 shadow-sm card-premium">
+            <div class="p-5 text-center flex-grow-1">
+                <div class="task-card-icon success mx-auto mb-4" style="width: 80px; height: 80px; font-size: 2rem;">
+                    <i class="bi bi-folder2-open"></i>
                 </div>
-                <h5 class="card-title">Relatório de Projetos</h5>
-                <p class="card-text text-muted">Análise detalhada dos seus projetos com estatísticas e progresso</p>
-                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalProjetos">
-                    <i class="bi bi-funnel me-1"></i> Gerar Relatório
+                <h4 class="fw-800 text-dark mb-3">Relatório de Projetos</h4>
+                <p class="text-muted mb-4 px-lg-5">Visão consolidada da saúde dos seus projetos, cronogramas e taxas de conclusão.</p>
+            </div>
+            <div class="p-4 bg-light border-top text-center">
+                <button class="btn btn-success px-5 py-2 rounded-pill fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalProjetos">
+                    <i class="bi bi-gear-fill me-2"></i> Configurar e Gerar
                 </button>
             </div>
         </div>
     </div>
 
     <!-- Relatório de Tarefas -->
-    <div class="col-lg-6 col-md-6 mb-4">
-        <div class="card h-100 card-hover">
-            <div class="card-body text-center">
-                <div class="mb-3">
-                    <i class="bi bi-list-task text-info" style="font-size: 3rem;"></i>
+    <div class="col-lg-6">
+        <div class="chart-container h-100 d-flex flex-column p-0 overflow-hidden border-0 shadow-sm card-premium">
+            <div class="p-5 text-center flex-grow-1">
+                <div class="task-card-icon info mx-auto mb-4" style="width: 80px; height: 80px; font-size: 2rem;">
+                    <i class="bi bi-list-check"></i>
                 </div>
-                <h5 class="card-title">Relatório de Tarefas</h5>
-                <p class="card-text text-muted">Relatório completo das tarefas com filtros avançados</p>
-                <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalTarefas">
-                    <i class="bi bi-funnel me-1"></i> Gerar Relatório
+                <h4 class="fw-800 text-dark mb-3">Relatório de Tarefas</h4>
+                <p class="text-muted mb-4 px-lg-5">Análise granular de produtividade, gargalos e prazos de entrega individuais.</p>
+            </div>
+            <div class="p-4 bg-light border-top text-center">
+                <button class="btn btn-info px-5 py-2 rounded-pill fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTarefas">
+                    <i class="bi bi-gear-fill me-2"></i> Configurar e Gerar
                 </button>
             </div>
         </div>
@@ -53,39 +58,37 @@
 
 <!-- Modal Filtros Projetos -->
 <div class="modal fade" id="modalProjetos" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
             <form action="{{ route('relatorios.projetos') }}" method="GET">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="bi bi-folder me-2"></i>Filtros - Relatório de Projetos
-                    </h5>
+                <div class="modal-header border-0 p-4 pb-0">
+                    <h5 class="fw-800 text-dark mb-0">Parâmetros de Projetos</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Status</label>
-                        <select class="form-select" name="status">
-                            <option value="">Todos</option>
+                <div class="modal-body p-4">
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Status do Projeto</label>
+                        <select class="form-select border-0 bg-light p-3" name="status">
+                            <option value="">Todos (Ativos e Inativos)</option>
                             <option value="ativo">Apenas Ativos</option>
                             <option value="inativo">Apenas Inativos</option>
                         </select>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Data Início</label>
-                            <input type="date" class="form-control" name="data_inicio">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Data Inicial</label>
+                            <input type="date" class="form-control border-0 bg-light p-3" name="data_inicio">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Data Fim</label>
-                            <input type="date" class="form-control" name="data_fim">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Data Final</label>
+                            <input type="date" class="form-control border-0 bg-light p-3" name="data_fim">
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">
-                        <i class="bi bi-file-earmark-text me-1"></i> Gerar Relatório
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light px-4 py-2 rounded-pill fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success px-4 py-2 rounded-pill fw-bold shadow-sm">
+                        <i class="bi bi-file-earmark-pdf me-2"></i> Gerar PDF
                     </button>
                 </div>
             </form>
@@ -95,78 +98,65 @@
 
 <!-- Modal Filtros Tarefas -->
 <div class="modal fade" id="modalTarefas" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
             <form action="{{ route('relatorios.tarefas') }}" method="GET">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="bi bi-list-task me-2"></i>Filtros - Relatório de Tarefas
-                    </h5>
+                <div class="modal-header border-0 p-4 pb-0">
+                    <h5 class="fw-800 text-dark mb-0">Parâmetros de Tarefas</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Projeto</label>
-                            <select class="form-select" name="projeto_id">
+                <div class="modal-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Filtrar por Projeto</label>
+                            <select class="form-select border-0 bg-light p-3" name="projeto_id">
                                 <option value="">Todos os Projetos</option>
                                 @foreach($projetos as $projeto)
                                     <option value="{{ $projeto->id }}">{{ $projeto->titulo }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Status</label>
-                            <select class="form-select" name="status">
-                                <option value="">Todos</option>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Status da Tarefa</label>
+                            <select class="form-select border-0 bg-light p-3" name="status">
+                                <option value="">Todos os Status</option>
                                 <option value="backlog">Backlog</option>
                                 <option value="pendente">Pendente</option>
                                 <option value="em desenvolvimento">Em Desenvolvimento</option>
                                 <option value="concluida">Concluída</option>
                             </select>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Data Criação - Início</label>
-                            <input type="date" class="form-control" name="data_inicio">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Período de Criação (Início)</label>
+                            <input type="date" class="form-control border-0 bg-light p-3" name="data_inicio">
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Data Criação - Fim</label>
-                            <input type="date" class="form-control" name="data_fim">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Período de Criação (Fim)</label>
+                            <input type="date" class="form-control border-0 bg-light p-3" name="data_fim">
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Data Vencimento - Início</label>
-                            <input type="date" class="form-control" name="data_vencimento_inicio">
+                        <div class="col-12">
+                            <div class="activity-item bg-light border-0 p-4 rounded-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-1">Apenas Tarefas Atrasadas</h6>
+                                        <p class="text-muted small mb-0">Filtrar apenas itens que ultrapassaram o prazo de vencimento.</p>
+                                    </div>
+                                    <div class="form-check form-switch p-0 m-0">
+                                        <input class="form-check-input ms-0 mt-1" type="checkbox" name="apenas_atrasadas" value="1" id="apenasAtrasadas" style="width: 3rem; height: 1.5rem;">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Data Vencimento - Fim</label>
-                            <input type="date" class="form-control" name="data_vencimento_fim">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Responsável</label>
-                        <input type="text" class="form-control" name="responsavel" placeholder="Nome do responsável">
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="apenas_atrasadas" value="1" id="apenasAtrasadas">
-                        <label class="form-check-label" for="apenasAtrasadas">
-                            Apenas tarefas atrasadas
-                        </label>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-info">
-                        <i class="bi bi-file-earmark-text me-1"></i> Gerar Relatório
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light px-4 py-2 rounded-pill fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-info px-4 py-2 rounded-pill fw-bold shadow-sm">
+                        <i class="bi bi-file-earmark-spreadsheet me-2"></i> Gerar Relatório
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
 @endsection
-

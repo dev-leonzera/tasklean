@@ -1,38 +1,67 @@
-<div class="mt-4">
-    <h6 class="fw-bold mb-3"><i class="bi bi-chat-dots me-2"></i>Discussão da Tarefa</h6>
+<div class="mt-5 pt-4 border-top">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h6 class="fw-800 text-dark mb-0">
+            <i class="bi bi-chat-left-dots text-primary me-2"></i> Discussão e Feedback
+        </h6>
+        <span class="badge bg-light text-primary rounded-pill px-3">{{ $comentarios->count() }} comentários</span>
+    </div>
     
-    <div class="comments-list mb-3" style="max-height: 300px; overflow-y: auto;">
+    <div class="comments-list mb-4 pe-2" style="max-height: 400px; overflow-y: auto; scrollbar-width: thin;">
         @forelse($comentarios as $comentario)
-            <div class="d-flex mb-3">
-                <div class="flex-shrink-0">
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.8rem;">
-                        {{ substr($comentario->user->name, 0, 1) }}
-                    </div>
-                </div>
-                <div class="flex-grow-1 ms-2">
-                    <div class="bg-light p-2 rounded">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <small class="fw-bold">{{ $comentario->user->name }}</small>
-                            <small class="text-muted" style="font-size: 0.7rem;">{{ $comentario->created_at->diffForHumans() }}</small>
+            <div class="activity-item bg-light border-0 rounded-4 p-3 mb-3 animate-fade-in">
+                <div class="d-flex gap-3">
+                    <div class="flex-shrink-0">
+                        <div class="user-avatar" style="width: 38px; height: 38px; font-size: 0.9rem; border-radius: 12px;">
+                            {{ substr($comentario->user->name, 0, 1) }}
                         </div>
-                        <div class="small">{{ $comentario->conteudo }}</div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold text-dark small">{{ $comentario->user->name }}</span>
+                            <span class="text-muted" style="font-size: 0.7rem;">
+                                <i class="bi bi-clock me-1"></i> {{ $comentario->created_at->diffForHumans() }}
+                            </span>
+                        </div>
+                        <div class="text-muted small lh-base">{{ $comentario->conteudo }}</div>
                     </div>
                 </div>
             </div>
         @empty
-            <div class="text-center py-3 text-muted small italic">
-                Nenhum comentário ainda. Comece a discussão!
+            <div class="text-center py-5 chart-container border-0 shadow-none bg-light bg-opacity-50 rounded-4">
+                <i class="bi bi-chat-square-dots text-muted opacity-25 fs-1 mb-3 d-block"></i>
+                <p class="text-muted small mb-0 italic">Nenhum comentário ainda. Seja o primeiro a participar da discussão!</p>
             </div>
         @endforelse
     </div>
 
-    <form wire:submit.prevent="adicionarComentario">
-        <div class="input-group input-group-sm">
-            <input type="text" wire:model="novoComentario" class="form-control" placeholder="Escreva um comentário...">
-            <button class="btn btn-primary" type="submit">
-                <i class="bi bi-send"></i>
-            </button>
-        </div>
-        @error('novoComentario') <small class="text-danger">{{ $message }}</small> @enderror
-    </form>
+    <div class="chart-container p-3 border-0 bg-white shadow-sm rounded-4">
+        <form wire:submit.prevent="adicionarComentario">
+            <div class="input-group">
+                <input type="text" wire:model="novoComentario" class="form-control border-0 bg-light rounded-start-4 px-3" 
+                       placeholder="Escreva sua mensagem aqui..." style="box-shadow: none;">
+                <button class="btn btn-primary px-4 rounded-end-4" type="submit" wire:loading.attr="disabled">
+                    <span wire:loading.remove><i class="bi bi-send-fill"></i></span>
+                    <span wire:loading class="spinner-border spinner-border-sm"></span>
+                </button>
+            </div>
+            @error('novoComentario') <div class="text-danger x-small mt-2 ms-2 fw-bold"><i class="bi bi-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
+        </form>
+    </div>
 </div>
+
+<style>
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .comments-list::-webkit-scrollbar {
+        width: 4px;
+    }
+    .comments-list::-webkit-scrollbar-thumb {
+        background-color: rgba(0,0,0,0.1);
+        border-radius: 10px;
+    }
+</style>

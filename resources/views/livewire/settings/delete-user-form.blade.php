@@ -1,34 +1,46 @@
-<section class="mt-10 space-y-6">
-    <div class="relative mb-5">
-        <flux:heading>{{ __('Delete account') }}</flux:heading>
-        <flux:subheading>{{ __('Delete your account and all of its resources') }}</flux:subheading>
+<section class="mt-5 pt-5 border-top">
+    <div class="mb-4">
+        <h5 class="fw-800 text-danger mb-1">{{ __('Excluir Conta') }}</h5>
+        <p class="text-muted small mb-0">{{ __('Exclua permanentemente sua conta e todos os seus recursos do Tasklean.') }}</p>
     </div>
 
-    <flux:modal.trigger name="confirm-user-deletion">
-        <flux:button variant="danger" x-data="" x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')">
-            {{ __('Delete account') }}
-        </flux:button>
-    </flux:modal.trigger>
+    <button type="button" class="btn btn-outline-danger px-4 py-2 rounded-pill fw-bold" 
+            data-bs-toggle="modal" data-bs-target="#confirmUserDeletion">
+        <i class="bi bi-person-x me-2"></i> {{ __('Excluir Minha Conta') }}
+    </button>
 
-    <flux:modal name="confirm-user-deletion" :show="$errors->isNotEmpty()" focusable class="max-w-lg">
-        <form method="POST" wire:submit="deleteUser" class="space-y-6">
-            <div>
-                <flux:heading size="lg">{{ __('Are you sure you want to delete your account?') }}</flux:heading>
+    <!-- Modal de Confirmação -->
+    <div class="modal fade" id="confirmUserDeletion" tabindex="-1" aria-labelledby="confirmUserDeletionLabel" aria-hidden="true" wire:ignore.self>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg card-premium">
+                <form method="POST" wire:submit="deleteUser">
+                    <div class="modal-header border-bottom bg-light bg-opacity-50 p-4">
+                        <h5 class="modal-title fw-800 text-dark" id="confirmUserDeletionLabel">
+                            <i class="bi bi-exclamation-triangle text-danger me-2"></i>
+                            {{ __('Confirmar Exclusão') }}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <p class="text-muted mb-4">
+                            {{ __('Uma vez que sua conta for excluída, todos os seus dados serão permanentemente removidos. Por favor, insira sua senha para confirmar que deseja excluir sua conta.') }}
+                        </p>
 
-                <flux:subheading>
-                    {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.') }}
-                </flux:subheading>
+                        <x-auth.form-input 
+                            wireModel="password" 
+                            :label="__('Sua Senha')" 
+                            type="password" 
+                            required 
+                            icon="bi bi-shield-lock"
+                            error="{{ $errors->first('password') }}"
+                        />
+                    </div>
+                    <div class="modal-footer border-top-0 p-4 gap-2">
+                        <button type="button" class="btn btn-secondary px-4 rounded-pill" data-bs-dismiss="modal">{{ __('Cancelar') }}</button>
+                        <button type="submit" class="btn btn-danger px-4 rounded-pill fw-bold">{{ __('Sim, Excluir Minha Conta') }}</button>
+                    </div>
+                </form>
             </div>
-
-            <flux:input wire:model="password" :label="__('Password')" type="password" />
-
-            <div class="flex justify-end space-x-2 rtl:space-x-reverse">
-                <flux:modal.close>
-                    <flux:button variant="filled">{{ __('Cancel') }}</flux:button>
-                </flux:modal.close>
-
-                <flux:button variant="danger" type="submit">{{ __('Delete account') }}</flux:button>
-            </div>
-        </form>
-    </flux:modal>
+        </div>
+    </div>
 </section>

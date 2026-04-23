@@ -3,77 +3,77 @@
 @section('title', 'Novo Projeto - Tasklean')
 @section('page-title', 'Novo Projeto')
 
+@section('actions')
+    <a href="{{ route('projetos.index') }}" class="btn btn-secondary px-4 shadow-sm">
+        <i class="bi bi-arrow-left me-2"></i> Voltar para Projetos
+    </a>
+@endsection
+
 @section('content')
 <div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-plus-circle"></i> Criar Novo Projeto
-                </h5>
+    <div class="col-xl-8">
+        <div class="chart-container p-0 overflow-hidden border-0 shadow-sm card-premium">
+            <!-- Header -->
+            <div class="p-4 border-bottom bg-light bg-opacity-50">
+                <div class="d-flex align-items-center">
+                    <div class="task-card-icon primary me-3">
+                        <i class="bi bi-folder-plus"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-800 text-dark mb-1">Iniciar Novo Projeto</h4>
+                        <p class="text-muted mb-0">Defina o título e a responsabilidade inicial do projeto.</p>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
+
+            <!-- Form -->
+            <div class="p-4 p-lg-5">
                 <form action="{{ route('projetos.store') }}" method="POST">
                     @csrf
                     
-                    <div class="mb-3">
-                        <label for="titulo" class="form-label">
-                            Título do Projeto <span class="text-danger">*</span>
-                        </label>
-                        <input type="text" 
-                               class="form-control @error('titulo') is-invalid @enderror" 
-                               id="titulo" 
-                               name="titulo" 
-                               value="{{ old('titulo') }}" 
-                               required>
-                        @error('titulo')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="responsavel_id" class="form-label">
-                            Responsável <span class="text-danger">*</span>
-                        </label>
-                        <select class="form-select @error('responsavel_id') is-invalid @enderror" 
-                                id="responsavel_id" 
-                                name="responsavel_id" 
-                                required>
-                            <option value="">Selecione um responsável</option>
-                            @foreach($usuarios as $usuario)
-                                <option value="{{ $usuario->id }}" {{ old('responsavel_id') == $usuario->id ? 'selected' : '' }}>
-                                    {{ $usuario->name }} ({{ $usuario->email }})
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('responsavel_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" 
-                                   type="checkbox" 
-                                   id="ativo" 
-                                   name="ativo" 
-                                   value="1" 
-                                   {{ old('ativo', true) ? 'checked' : '' }}>
-                            <label class="form-check-label" for="ativo">
-                                Projeto Ativo
-                            </label>
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-dark">Título do Projeto <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-lg @error('titulo') is-invalid @enderror" 
+                                   name="titulo" value="{{ old('titulo') }}" placeholder="Ex: Redesign do Website Institucional" required>
+                            @error('titulo') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
-                        <small class="form-text text-muted">
-                            Projetos inativos não aparecem nas listagens principais
-                        </small>
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-dark">Membro Responsável <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-lg @error('responsavel_id') is-invalid @enderror" name="responsavel_id" required>
+                                <option value="">Selecione o gestor do projeto...</option>
+                                @foreach($usuarios as $usuario)
+                                    <option value="{{ $usuario->id }}" {{ old('responsavel_id') == $usuario->id ? 'selected' : '' }}>
+                                        {{ $usuario->name }} ({{ $usuario->email }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('responsavel_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-12">
+                            <div class="activity-item bg-light border-0 p-4 rounded-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-1">Status de Ativação</h6>
+                                        <p class="text-muted small mb-0">Projetos inativos ficam ocultos dos fluxos de trabalho ativos.</p>
+                                    </div>
+                                    <div class="form-check form-switch p-0 m-0">
+                                        <input class="form-check-input ms-0 mt-1" type="checkbox" name="ativo" value="1" id="ativo" 
+                                               {{ old('ativo', true) ? 'checked' : '' }} style="width: 3rem; height: 1.5rem;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="d-flex justify-content-between">
-                        <a href="{{ route('projetos.index') }}" class="btn btn-secondary">
-                            <i class="bi bi-arrow-left"></i> Voltar
+                    <div class="d-flex justify-content-end gap-3 mt-5 pt-4 border-top">
+                        <a href="{{ route('projetos.index') }}" class="btn btn-light px-5 py-2 fw-bold text-muted rounded-pill border">
+                            Cancelar
                         </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-circle"></i> Criar Projeto
+                        <button type="submit" class="btn btn-primary px-5 py-2 fw-bold rounded-pill shadow-sm">
+                            <i class="bi bi-check-lg me-2"></i> Criar Projeto
                         </button>
                     </div>
                 </form>

@@ -1,6 +1,6 @@
 @props([
     'type' => 'text',
-    'name',
+    'name' => null,
     'label',
     'placeholder' => '',
     'required' => false,
@@ -16,6 +16,7 @@
 ])
 
 @php
+    $name = $name ?? $wireModel;
     $inputId = $id ?? $name;
     $hasError = $error !== null;
     $inputClass = 'form-control form-control-lg ' . ($hasError ? 'is-invalid' : '') . ' ' . $class;

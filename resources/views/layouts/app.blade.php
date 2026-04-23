@@ -15,6 +15,8 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
     <style>
         :root {
             --primary-color: #10b981;
@@ -392,6 +394,67 @@
         .sidebar-overlay.show {
             display: block;
         }
+
+        /* Form Premium Styles */
+        .form-label {
+            font-weight: 600;
+            color: var(--medium-text);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .form-control, .form-select {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.6rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background-color: var(--light-bg);
+            box-shadow: none;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: var(--white);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+        
+        .form-control::placeholder {
+            color: var(--light-text);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px -1px rgba(16, 185, 129, 0.3);
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #047857 100%);
+        }
+
+        .btn-secondary {
+            background-color: var(--white);
+            color: var(--medium-text);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            border-color: var(--medium-text);
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -489,7 +552,17 @@
                     <button class="sidebar-toggle me-3" id="sidebarToggle" title="Alternar sidebar">
                         <i class="bi bi-list"></i>
                     </button>
+                    <!-- Command Menu Shortcut -->
+                    <div class="d-none d-lg-flex align-items-center bg-white border rounded-pill px-3 py-1.5 me-3" style="cursor: pointer; font-size: 0.85rem; transition: all 0.2s;" onclick="window.dispatchEvent(new KeyboardEvent('keydown', {key: 'k', metaKey: true, ctrlKey: true}))" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='var(--border-color)'">
+                        <i class="bi bi-search text-muted me-2"></i>
+                        <span class="text-muted me-4">Buscar ou executar comando...</span>
+                        <div class="d-flex gap-1">
+                            <kbd class="bg-light border rounded px-1.5 text-xs text-muted font-sans" style="font-size: 0.7rem;">⌘</kbd>
+                            <kbd class="bg-light border rounded px-1.5 text-xs text-muted font-sans" style="font-size: 0.7rem;">K</kbd>
+                        </div>
+                    </div>
                     <div class="d-flex align-items-center d-md-none">
+
                         <img src="{{ asset('images/logo-tasklean-compact.svg') }}" alt="Tasklean" height="24" class="me-2">
                     </div>
                 </div>
@@ -603,8 +676,12 @@
         </div>
     </main>
 
+    <!-- Command Menu Component -->
+    <livewire:command-menu />
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     
     <!-- Custom JS -->
     <script>
@@ -728,7 +805,37 @@
                     sidebarCollapsed = false;
                 }
             });
+
+            // Atalhos de Teclado Globais (Sequências)
+            let keyBuffer = '';
+            let keyTimeout;
+
+            document.addEventListener('keydown', function(e) {
+                // Não disparar atalhos se o usuário estiver digitando em um input ou textarea
+                if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) || e.target.isContentEditable) {
+                    return;
+                }
+
+                // Limpar buffer se demorar muito entre as teclas (500ms)
+                clearTimeout(keyTimeout);
+                keyBuffer += e.key.toLowerCase();
+                keyTimeout = setTimeout(() => { keyBuffer = ''; }, 500);
+
+                const shortcuts = {
+                    'd': "{{ route('dashboard') }}",
+                    'p': "{{ route('projetos.index') }}",
+                    't': "{{ route('tarefas.index') }}",
+                    'n': "{{ route('tarefas.create') }}",
+                    'k': "{{ route('kanban') }}",
+                };
+
+                if (shortcuts[keyBuffer]) {
+                    window.location.href = shortcuts[keyBuffer];
+                    keyBuffer = '';
+                }
+            });
         });
+
 
         // Função para criar notificação em tempo real
         function createRealtimeNotification(type, title, message, action = null) {

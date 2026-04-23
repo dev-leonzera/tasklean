@@ -1,198 +1,154 @@
 @extends('layouts.app')
 
-@section('title', 'Criar Compromisso - Tasklean')
-@section('page-title', 'Criar Compromisso')
+@section('title', 'Novo Compromisso - Tasklean')
+@section('page-title', 'Novo Compromisso')
 
 @section('actions')
-    <a href="{{ route('compromissos.index') }}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i> Voltar
+    <a href="{{ route('compromissos.index') }}" class="btn btn-secondary px-4 shadow-sm">
+        <i class="bi bi-arrow-left me-2"></i> Voltar para Agenda
     </a>
 @endsection
 
 @section('content')
-<!-- Page Header -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="h3 mb-1 fw-bold text-primary">
-                    <i class="bi bi-plus-circle me-2"></i>Criar Compromisso
-                </h1>
-                <p class="text-muted mb-0">Adicione um novo compromisso à sua agenda</p>
+<div class="row justify-content-center">
+    <div class="col-xl-9">
+        <div class="chart-container p-0 overflow-hidden border-0 shadow-sm card-premium">
+            <!-- Header -->
+            <div class="p-4 border-bottom bg-light bg-opacity-50">
+                <div class="d-flex align-items-center">
+                    <div class="task-card-icon primary me-3">
+                        <i class="bi bi-calendar-plus"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-800 text-dark mb-1">Agendar Novo Compromisso</h4>
+                        <p class="text-muted mb-0">Preencha os detalhes abaixo para organizar seu novo evento ou tarefa.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <div class="p-4 p-lg-5">
+                <form action="{{ route('compromissos.store') }}" method="POST">
+                    @csrf
+                    
+                    <div class="row g-4">
+                        <!-- Título e Tipo -->
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold text-dark">Título do Compromisso <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-lg @error('titulo') is-invalid @enderror" 
+                                   name="titulo" value="{{ old('titulo') }}" placeholder="Ex: Reunião de Alinhamento Semanal" required>
+                            @error('titulo') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-dark">Tipo <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-lg @error('tipo') is-invalid @enderror" name="tipo" required>
+                                <option value="">Selecione o tipo...</option>
+                                <option value="reuniao" {{ old('tipo') === 'reuniao' ? 'selected' : '' }}>Reunião</option>
+                                <option value="evento" {{ old('tipo') === 'evento' ? 'selected' : '' }}>Evento</option>
+                                <option value="tarefa" {{ old('tipo') === 'tarefa' ? 'selected' : '' }}>Tarefa</option>
+                                <option value="lembrete" {{ old('tipo') === 'lembrete' ? 'selected' : '' }}>Lembrete</option>
+                                <option value="compromisso_pessoal" {{ old('tipo') === 'compromisso_pessoal' ? 'selected' : '' }}>Compromisso Pessoal</option>
+                                <option value="outro" {{ old('tipo') === 'outro' ? 'selected' : '' }}>Outro</option>
+                            </select>
+                            @error('tipo') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        
+                        <!-- Descrição -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-dark">Descrição / Pauta</label>
+                            <textarea class="form-control @error('descricao') is-invalid @enderror" 
+                                      name="descricao" rows="4" placeholder="Descreva brevemente o que será tratado neste compromisso...">{{ old('descricao') }}</textarea>
+                            @error('descricao') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <!-- Data e Hora -->
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold text-dark">Data Início <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control @error('data_inicio') is-invalid @enderror" 
+                                   name="data_inicio" value="{{ old('data_inicio', now()->format('Y-m-d')) }}" required>
+                            @error('data_inicio') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold text-dark">Hora Início <span class="text-danger">*</span></label>
+                            <input type="time" class="form-control @error('hora_inicio') is-invalid @enderror" 
+                                   name="hora_inicio" value="{{ old('hora_inicio', '09:00') }}" required>
+                            @error('hora_inicio') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold text-dark">Data Fim (Opcional)</label>
+                            <input type="date" class="form-control @error('data_fim') is-invalid @enderror" 
+                                   name="data_fim" value="{{ old('data_fim') }}">
+                            @error('data_fim') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold text-dark">Hora Fim (Opcional)</label>
+                            <input type="time" class="form-control @error('hora_fim') is-invalid @enderror" 
+                                   name="hora_fim" value="{{ old('hora_fim', '10:00') }}">
+                            @error('hora_fim') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <!-- Local e Prioridade -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark">Local ou Link da Reunião</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-geo-alt text-muted"></i></span>
+                                <input type="text" class="form-control border-start-0 ps-0 @error('local') is-invalid @enderror" 
+                                       name="local" value="{{ old('local') }}" placeholder="Ex: Sala 02 ou Google Meet Link">
+                            </div>
+                            @error('local') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark">Prioridade <span class="text-danger">*</span></label>
+                            <select class="form-select @error('prioridade') is-invalid @enderror" name="prioridade" required>
+                                <option value="baixa" {{ old('prioridade') === 'baixa' ? 'selected' : '' }}>🟢 Baixa</option>
+                                <option value="media" {{ old('prioridade', 'media') === 'media' ? 'selected' : '' }}>🟡 Média</option>
+                                <option value="alta" {{ old('prioridade') === 'alta' ? 'selected' : '' }}>🟠 Alta</option>
+                                <option value="urgente" {{ old('prioridade') === 'urgente' ? 'selected' : '' }}>🔴 Urgente</option>
+                            </select>
+                            @error('prioridade') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <!-- Lembrete e Status -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark">Configurar Lembrete</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-bell text-muted"></i></span>
+                                <input type="datetime-local" class="form-control border-start-0 ps-0 @error('lembrete') is-invalid @enderror" 
+                                       name="lembrete" value="{{ old('lembrete') }}">
+                            </div>
+                            @error('lembrete') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark">Status Inicial</label>
+                            <select class="form-select @error('status') is-invalid @enderror" name="status">
+                                <option value="agendado" {{ old('status') === 'agendado' ? 'selected' : '' }}>Agendado</option>
+                                <option value="em_andamento" {{ old('status') === 'em_andamento' ? 'selected' : '' }}>Em Andamento</option>
+                                <option value="concluido" {{ old('status') === 'concluido' ? 'selected' : '' }}>Concluído</option>
+                                <option value="adiado" {{ old('status') === 'adiado' ? 'selected' : '' }}>Adiado</option>
+                            </select>
+                            @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <!-- Observações -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-dark">Observações Internas (Privado)</label>
+                            <textarea class="form-control @error('observacoes') is-invalid @enderror" 
+                                      name="observacoes" rows="2" placeholder="Notas que apenas você verá...">{{ old('observacoes') }}</textarea>
+                            @error('observacoes') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-3 mt-5 pt-4 border-top">
+                        <a href="{{ route('compromissos.index') }}" class="btn btn-light px-5 py-2 fw-bold text-muted rounded-pill border">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary px-5 py-2 fw-bold rounded-pill shadow-sm">
+                            <i class="bi bi-check-lg me-2"></i> Criar Compromisso
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
-<style>
-    .form-card {
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        border: 1px solid var(--border-color);
-    }
-    
-    .form-label {
-        font-weight: 600;
-        color: var(--primary-color);
-        margin-bottom: 0.5rem;
-    }
-    
-    .form-control, .form-select {
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
-        transition: all 0.3s ease;
-    }
-    
-    .form-control:focus, .form-select:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25);
-    }
-    
-    .btn-primary {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        transform: translateY(-1px);
-    }
-    
-    .btn-secondary {
-        background: #f7fafc;
-        color: var(--secondary-color);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-secondary:hover {
-        background: #e2e8f0;
-        color: var(--primary-color);
-        transform: translateY(-1px);
-    }
-</style>
-
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="card form-card">
-            <div class="card-body p-4">
-                    <form action="{{ route('compromissos.store') }}" method="POST">
-                        @csrf
-                        
-                        <div class="row g-3">
-                            <div class="col-md-8">
-                                <label class="form-label">Título *</label>
-                                <input type="text" class="form-control @error('titulo') is-invalid @enderror" 
-                                       name="titulo" value="{{ old('titulo') }}" required>
-                                @error('titulo') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Tipo *</label>
-                                <select class="form-select @error('tipo') is-invalid @enderror" name="tipo" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="reuniao" {{ old('tipo') === 'reuniao' ? 'selected' : '' }}>Reunião</option>
-                                    <option value="evento" {{ old('tipo') === 'evento' ? 'selected' : '' }}>Evento</option>
-                                    <option value="tarefa" {{ old('tipo') === 'tarefa' ? 'selected' : '' }}>Tarefa</option>
-                                    <option value="lembrete" {{ old('tipo') === 'lembrete' ? 'selected' : '' }}>Lembrete</option>
-                                    <option value="compromisso_pessoal" {{ old('tipo') === 'compromisso_pessoal' ? 'selected' : '' }}>Compromisso Pessoal</option>
-                                    <option value="outro" {{ old('tipo') === 'outro' ? 'selected' : '' }}>Outro</option>
-                                </select>
-                                @error('tipo') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-                            
-                            <div class="col-12">
-                                <label class="form-label">Descrição</label>
-                                <textarea class="form-control @error('descricao') is-invalid @enderror" 
-                                          name="descricao" rows="3">{{ old('descricao') }}</textarea>
-                                @error('descricao') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Data Início *</label>
-                                <input type="date" class="form-control @error('data_inicio') is-invalid @enderror" 
-                                       name="data_inicio" value="{{ old('data_inicio', now()->format('Y-m-d')) }}" required>
-                                @error('data_inicio') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Data Fim</label>
-                                <input type="date" class="form-control @error('data_fim') is-invalid @enderror" 
-                                       name="data_fim" value="{{ old('data_fim') }}">
-                                @error('data_fim') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Hora Início *</label>
-                                <input type="time" class="form-control @error('hora_inicio') is-invalid @enderror" 
-                                       name="hora_inicio" value="{{ old('hora_inicio', '09:00') }}" required>
-                                @error('hora_inicio') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Hora Fim</label>
-                                <input type="time" class="form-control @error('hora_fim') is-invalid @enderror" 
-                                       name="hora_fim" value="{{ old('hora_fim', '10:00') }}">
-                                @error('hora_fim') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Local</label>
-                                <input type="text" class="form-control @error('local') is-invalid @enderror" 
-                                       name="local" value="{{ old('local') }}">
-                                @error('local') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Prioridade *</label>
-                                <select class="form-select @error('prioridade') is-invalid @enderror" name="prioridade" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="baixa" {{ old('prioridade') === 'baixa' ? 'selected' : '' }}>Baixa</option>
-                                    <option value="media" {{ old('prioridade') === 'media' ? 'selected' : '' }}>Média</option>
-                                    <option value="alta" {{ old('prioridade') === 'alta' ? 'selected' : '' }}>Alta</option>
-                                    <option value="urgente" {{ old('prioridade') === 'urgente' ? 'selected' : '' }}>Urgente</option>
-                                </select>
-                                @error('prioridade') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Status</label>
-                                <select class="form-select @error('status') is-invalid @enderror" name="status">
-                                    <option value="agendado" {{ old('status') === 'agendado' ? 'selected' : '' }}>Agendado</option>
-                                    <option value="em_andamento" {{ old('status') === 'em_andamento' ? 'selected' : '' }}>Em Andamento</option>
-                                    <option value="concluido" {{ old('status') === 'concluido' ? 'selected' : '' }}>Concluído</option>
-                                    <option value="cancelado" {{ old('status') === 'cancelado' ? 'selected' : '' }}>Cancelado</option>
-                                    <option value="adiado" {{ old('status') === 'adiado' ? 'selected' : '' }}>Adiado</option>
-                                </select>
-                                @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Lembrete</label>
-                                <input type="datetime-local" class="form-control @error('lembrete') is-invalid @enderror" 
-                                       name="lembrete" value="{{ old('lembrete') }}">
-                                @error('lembrete') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-
-                            <div class="col-12">
-                                <label class="form-label">Observações</label>
-                                <textarea class="form-control @error('observacoes') is-invalid @enderror" 
-                                          name="observacoes" rows="2">{{ old('observacoes') }}</textarea>
-                                @error('observacoes') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-                        </div>
-
-                <div class="d-flex justify-content-end mt-4 pt-3 border-top">
-                    <a href="{{ route('compromissos.index') }}" class="btn btn-secondary me-2">
-                        <i class="bi bi-x-circle me-1"></i> Cancelar
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-lg me-1"></i> Criar Compromisso
-                    </button>
-                </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 @endsection
