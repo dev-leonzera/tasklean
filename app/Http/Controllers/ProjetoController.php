@@ -58,7 +58,12 @@ class ProjetoController extends Controller
     public function create()
     {
         $usuarios = \App\Models\User::orderBy('name')->take(50)->get();
-        return view('projetos.create', compact('usuarios'));
+        $times = \App\Models\Time::where('owner_id', Auth::id())
+            ->orWhereHas('membros', function($q) {
+                $q->where('user_id', Auth::id());
+            })->get();
+
+        return view('projetos.create', compact('usuarios', 'times'));
     }
 
     /**
@@ -72,12 +77,14 @@ class ProjetoController extends Controller
         $request->validate([
             'titulo' => 'required|string|max:255',
             'responsavel_id' => 'required|exists:users,id',
+            'time_id' => 'nullable|exists:times,id',
             'ativo' => 'boolean'
         ]);
 
         Projeto::create([
             'titulo' => $request->titulo,
             'responsavel_id' => $request->responsavel_id,
+            'time_id' => $request->time_id,
             'ativo' => $request->ativo ?? true,
             'data_criacao' => now(),
             'user_id' => Auth::id()

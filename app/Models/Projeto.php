@@ -20,6 +20,7 @@ class Projeto extends Model
         'ativo',
         'responsavel_id',
         'user_id',
+        'time_id',
         'data_criacao',
     ];
 
@@ -64,6 +65,11 @@ class Projeto extends Model
     public function tags(): HasMany
     {
         return $this->hasMany(TagProjeto::class);
+    }
+
+    public function time(): BelongsTo
+    {
+        return $this->belongsTo(Time::class);
     }
 
     /**

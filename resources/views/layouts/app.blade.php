@@ -484,6 +484,11 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('times.*') ? 'active' : '' }}" href="{{ route('times.index') }}">
+                    <i class="bi bi-people"></i> Times
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('projetos.*') ? 'active' : '' }}" href="{{ route('projetos.index') }}">
                     <i class="bi bi-folder"></i> Projetos
                 </a>

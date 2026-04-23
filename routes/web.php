@@ -3,6 +3,8 @@
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\ProjetoController;
+use App\Http\Controllers\TimeController;
+use App\Http\Controllers\MembroTimeController;
 use App\Http\Controllers\TarefaController;
 use App\Http\Controllers\CompromissoController;
 use App\Http\Controllers\RelatorioController;
@@ -165,4 +167,21 @@ Route::middleware('auth')->group(function () {
     Route::get('compromissos-calendar', [CompromissoController::class, 'calendar'])->name('compromissos.calendar');
     Route::get('compromissos-hoje', [CompromissoController::class, 'today'])->name('compromissos.today');
     Route::get('compromissos-proximos', [CompromissoController::class, 'upcoming'])->name('compromissos.upcoming');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Rotas de Times (Protegidas por autenticação)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')->group(function () {
+    Route::resource('times', TimeController::class)->parameters([
+        'times' => 'time:slug'
+    ]);
+
+    // Gestão de Membros do Time
+    Route::post('times/{time:slug}/membros', [MembroTimeController::class, 'store'])->name('times.membros.store');
+    Route::delete('times/{time:slug}/membros/{user}', [MembroTimeController::class, 'destroy'])->name('times.membros.destroy');
+    Route::patch('times/{time:slug}/membros/{user}/regra', [MembroTimeController::class, 'updateRegra'])->name('times.membros.update-regra');
 });

@@ -39,17 +39,30 @@
                             @error('titulo') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
-                        <div class="col-12">
+                        <div class="col-md-6">
                             <label class="form-label fw-bold text-dark">Membro Responsável <span class="text-danger">*</span></label>
                             <select class="form-select form-select-lg @error('responsavel_id') is-invalid @enderror" name="responsavel_id" required>
-                                <option value="">Selecione o gestor do projeto...</option>
+                                <option value="">Selecione o gestor...</option>
                                 @foreach($usuarios as $usuario)
                                     <option value="{{ $usuario->id }}" {{ old('responsavel_id') == $usuario->id ? 'selected' : '' }}>
-                                        {{ $usuario->name }} ({{ $usuario->email }})
+                                        {{ $usuario->name }}
                                     </option>
                                 @endforeach
                             </select>
                             @error('responsavel_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark">Time Associado (Opcional)</label>
+                            <select class="form-select form-select-lg @error('time_id') is-invalid @enderror" name="time_id">
+                                <option value="">Projeto Pessoal (Sem Time)</option>
+                                @foreach($times as $time)
+                                    <option value="{{ $time->id }}" {{ (old('time_id') == $time->id || request('time_id') == $time->id) ? 'selected' : '' }}>
+                                        {{ $time->nome }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('time_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="col-12">
