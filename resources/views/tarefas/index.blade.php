@@ -38,55 +38,59 @@
 </div>
 
 <!-- Filtros -->
-<div class="chart-container mb-5 d-none" id="filtersCard">
-    <div class="d-flex align-items-center mb-4">
-        <h5 class="section-title mb-0">
-            <i class="bi bi-funnel"></i> Refinar Busca
-        </h5>
-    </div>
-    <div class="row g-4">
-        <div class="col-md-3">
-            <label class="form-label">Status</label>
-            <select class="form-select" id="statusFilter">
-                <option value="">Todos os Status</option>
-                <option value="backlog">Backlog</option>
-                <option value="pendente">Pendente</option>
-                <option value="em desenvolvimento">Em Desenvolvimento</option>
-                <option value="concluida">Concluída</option>
-            </select>
+<div class="chart-container mb-5 {{ request()->anyFilled(['status', 'projeto_id', 'busca']) ? '' : 'd-none' }}" id="filtersCard">
+    <form method="GET" action="{{ route('tarefas.index') }}" id="filtersForm">
+        <div class="d-flex align-items-center mb-4">
+            <h5 class="section-title mb-0">
+                <i class="bi bi-funnel"></i> Refinar Busca
+            </h5>
         </div>
-        <div class="col-md-3">
-            <label class="form-label">Projeto</label>
-            <select class="form-select" id="projetoFilter">
-                <option value="">Todos os Projetos</option>
-                @foreach($tarefas->pluck('projeto')->unique() as $projeto)
-                    <option value="{{ $projeto->id }}">{{ $projeto->titulo }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-md-4">
-            <label class="form-label">Buscar por título ou responsável</label>
-            <div class="input-group">
-                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
-                <input type="text" class="form-control border-start-0 ps-0" id="searchInput" placeholder="Digite para buscar...">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="status" onchange="this.form.submit()">
+                    <option value="">Todos os Status</option>
+                    <option value="backlog" {{ request('status') == 'backlog' ? 'selected' : '' }}>Backlog</option>
+                    <option value="pendente" {{ request('status') == 'pendente' ? 'selected' : '' }}>Pendente</option>
+                    <option value="em desenvolvimento" {{ request('status') == 'em desenvolvimento' ? 'selected' : '' }}>Em Desenvolvimento</option>
+                    <option value="concluida" {{ request('status') == 'concluida' ? 'selected' : '' }}>Concluída</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Projeto</label>
+                <select class="form-select" name="projeto_id" onchange="this.form.submit()">
+                    <option value="">Todos os Projetos</option>
+                    @foreach($projetos as $projeto)
+                        <option value="{{ $projeto->id }}" {{ request('projeto_id') == $projeto->id ? 'selected' : '' }}>{{ $projeto->titulo }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Buscar por título ou responsável</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" class="form-control border-start-0 ps-0" name="busca" value="{{ request('busca') }}" placeholder="Digite e aperte Enter...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        Filtrar
+                    </button>
+                    <a href="{{ route('tarefas.index') }}" class="btn btn-secondary" title="Limpar Filtros">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                </div>
             </div>
         </div>
-        <div class="col-md-2">
-            <label class="form-label">&nbsp;</label>
-            <button class="btn btn-secondary w-100" onclick="clearFilters()">
-                <i class="bi bi-arrow-counterclockwise me-1"></i> Limpar
-            </button>
-        </div>
-    </div>
+    </form>
 </div>
 
 @if($tarefas->count() > 0)
     <div class="row" id="tarefasContainer">
         @foreach($tarefas as $tarefa)
-            <div class="col-xl-4 col-lg-6 mb-4 tarefa-card-item" 
-                 data-status="{{ $tarefa->status }}" 
-                 data-projeto="{{ $tarefa->projeto_id }}"
-                 data-search="{{ strtolower($tarefa->titulo . ' ' . ($tarefa->responsavel->name ?? '')) }}">
+            <div class="col-xl-4 col-lg-6 mb-4 tarefa-card-item">
                 
                 <div class="chart-container p-0 overflow-hidden h-100 d-flex flex-column border-0 shadow-sm card-premium">
                     @php
@@ -197,48 +201,6 @@
     function toggleFilters() {
         const filtersCard = document.getElementById('filtersCard');
         filtersCard.classList.toggle('d-none');
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const statusFilter = document.getElementById('statusFilter');
-        const projetoFilter = document.getElementById('projetoFilter');
-        const searchInput = document.getElementById('searchInput');
-        
-        function filterTarefas() {
-            const statusValue = statusFilter.value;
-            const projetoValue = projetoFilter.value;
-            const searchValue = searchInput.value.toLowerCase();
-            
-            const cards = document.querySelectorAll('.tarefa-card-item');
-            
-            cards.forEach(card => {
-                const status = card.dataset.status;
-                const projeto = card.dataset.projeto;
-                const search = card.dataset.search;
-                
-                let show = true;
-                
-                if (statusValue && status !== statusValue) show = false;
-                if (projetoValue && projeto !== projetoValue) show = false;
-                if (searchValue && !search.includes(searchValue)) show = false;
-                
-                card.style.display = show ? 'block' : 'none';
-            });
-        }
-        
-        statusFilter.addEventListener('change', filterTarefas);
-        projetoFilter.addEventListener('change', filterTarefas);
-        searchInput.addEventListener('input', filterTarefas);
-    });
-    
-    function clearFilters() {
-        document.getElementById('statusFilter').value = '';
-        document.getElementById('projetoFilter').value = '';
-        document.getElementById('searchInput').value = '';
-        
-        document.querySelectorAll('.tarefa-card-item').forEach(card => {
-            card.style.display = 'block';
-        });
     }
 </script>
 @endsection

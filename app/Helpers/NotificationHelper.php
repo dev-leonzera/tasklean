@@ -227,12 +227,25 @@ class NotificationHelper
     }
 
     /**
-     * Executa todas as verificações de notificações
+     * Executa todas as verificações de notificações (com cache de 5 minutos)
      */
     public static function checkAll(): void
     {
+        $userId = Auth::id();
+        if (!$userId) return;
+
+        $cacheKey = 'user_notifications_checked_' . $userId;
+        
+        // Se já verificamos recentemente, não fazemos nada (as notificações já estão na sessão ou descartadas)
+        if (\Illuminate\Support\Facades\Cache::has($cacheKey)) {
+            return;
+        }
+
         self::checkTarefasPrestesAtrasar();
         self::checkProjetosSemTarefas();
         self::checkTarefasEmDesenvolvimentoAntigas();
+
+        // Marcar como verificado por 5 minutos
+        \Illuminate\Support\Facades\Cache::put($cacheKey, true, now()->addMinutes(5));
     }
 }

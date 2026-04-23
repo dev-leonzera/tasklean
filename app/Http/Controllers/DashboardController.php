@@ -25,17 +25,17 @@ class DashboardController extends Controller
         // Elas serão verificadas apenas quando solicitado pelo usuário
         
         // Estatísticas gerais do usuário
-        $totalProjetos = Projeto::where('user_id', $user->id)->count();
-        $projetosAtivos = Projeto::where('user_id', $user->id)->ativos()->count();
-        $totalTarefas = Tarefa::where('user_id', $user->id)->count();
+        $totalProjetos = Projeto::accessibleBy($user)->count();
+        $projetosAtivos = Projeto::accessibleBy($user)->ativos()->count();
+        $totalTarefas = Tarefa::accessibleBy($user)->count();
         
         // Tarefas por status do usuário
-        $tarefasBacklog = Tarefa::where('user_id', $user->id)->backlog()->count();
-        $tarefasPendentes = Tarefa::where('user_id', $user->id)->pendentes()->count();
-        $tarefasConcluidas = Tarefa::where('user_id', $user->id)->concluidas()->count();
+        $tarefasBacklog = Tarefa::accessibleBy($user)->backlog()->count();
+        $tarefasPendentes = Tarefa::accessibleBy($user)->pendentes()->count();
+        $tarefasConcluidas = Tarefa::accessibleBy($user)->concluidas()->count();
         
         // Tarefas atrasadas do usuário
-        $tarefasAtrasadas = Tarefa::where('user_id', $user->id)
+        $tarefasAtrasadas = Tarefa::accessibleBy($user)
             ->atrasadas()
             ->with(['projeto', 'responsavel'])
             ->latest()
@@ -43,7 +43,7 @@ class DashboardController extends Controller
             ->get();
         
         // Tarefas para hoje do usuário
-        $tarefasParaHoje = Tarefa::where('user_id', $user->id)
+        $tarefasParaHoje = Tarefa::accessibleBy($user)
             ->paraHoje()
             ->with(['projeto', 'responsavel'])
             ->orderBy('data_vencimento')
@@ -51,16 +51,14 @@ class DashboardController extends Controller
             ->get();
         
         // Projetos recentes do usuário
-        $projetosRecentes = Projeto::where('user_id', $user->id)
-            ->with(['tarefas' => function($query) use ($user) {
-                $query->where('user_id', $user->id);
-            }])
+        $projetosRecentes = Projeto::accessibleBy($user)
+            ->with(['tarefas'])
             ->latest()
             ->take(5)
             ->get();
         
         // Tarefas recentes do usuário
-        $tarefasRecentes = Tarefa::where('user_id', $user->id)
+        $tarefasRecentes = Tarefa::accessibleBy($user)
             ->with(['projeto', 'responsavel'])
             ->latest()
             ->take(5)
@@ -84,17 +82,17 @@ class DashboardController extends Controller
             ->get();
         
         // Estatísticas por projeto do usuário
-        $projetosComEstatisticas = Projeto::where('user_id', $user->id)
+        $projetosComEstatisticas = Projeto::accessibleBy($user)
             ->withCount([
                 'tarefas as total_tarefas',
-                'tarefas as tarefas_pendentes' => function($query) use ($user) {
-                    $query->where('user_id', $user->id)->where('status', 'pendente');
+                'tarefas as tarefas_pendentes' => function($query) {
+                    $query->where('status', 'pendente');
                 },
-                'tarefas as tarefas_em_desenvolvimento' => function($query) use ($user) {
-                    $query->where('user_id', $user->id)->where('status', 'em desenvolvimento');
+                'tarefas as tarefas_em_desenvolvimento' => function($query) {
+                    $query->where('status', 'em desenvolvimento');
                 },
-                'tarefas as tarefas_concluidas' => function($query) use ($user) {
-                    $query->where('user_id', $user->id)->where('status', 'concluida');
+                'tarefas as tarefas_concluidas' => function($query) {
+                    $query->where('status', 'concluida');
                 }
             ])
             ->get()

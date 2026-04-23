@@ -179,4 +179,20 @@ class Tarefa extends Model
     {
         return $this->status === 'backlog';
     }
+
+    /**
+     * Scope para tarefas acessíveis pelo usuário
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param User $user
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeAccessibleBy($query, User $user)
+    {
+        return $query->where('user_id', $user->id)
+            ->orWhere('responsavel_id', $user->id)
+            ->orWhereHas('projeto', function($q) use ($user) {
+                $q->accessibleBy($user);
+            });
+    }
 }
