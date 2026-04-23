@@ -1,470 +1,216 @@
 <div>
-    <!-- Filtros -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex align-items-center gap-3">
-                <label for="projeto-filtro" class="form-label mb-0 fw-bold">Filtrar por Projeto:</label>
-                <select wire:model.live="projetoId" id="projeto-filtro" class="form-select" style="max-width: 300px;">
-                    <option value="">Todos os projetos</option>
-                    @foreach($projetos as $projeto)
-                        <option value="{{ $projeto->id }}">{{ $projeto->titulo }}</option>
-                    @endforeach
-                </select>
+    <!-- Filtros Superiores -->
+    <div class="chart-container mb-4 py-3">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="task-card-icon primary" style="width: 40px; height: 40px;">
+                        <i class="bi bi-funnel"></i>
+                    </div>
+                    <div>
+                        <label for="projeto-filtro" class="form-label mb-0 fw-800 small text-uppercase text-muted">Filtrar por Projeto</label>
+                        <select wire:model.live="projetoId" id="projeto-filtro" class="form-select border-0 fw-bold p-0 bg-transparent text-dark" style="box-shadow: none;">
+                            <option value="">Todos os Projetos Ativos</option>
+                            @foreach($projetos as $projeto)
+                                <option value="{{ $projeto->id }}">{{ $projeto->titulo }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 text-md-end mt-3 mt-md-0">
                 @if($projetoId)
-                    <button wire:click="limparFiltro" class="btn btn-outline-secondary btn-sm">
-                        <i class="bi bi-x-circle"></i> Limpar
+                    <button wire:click="limparFiltro" class="btn btn-soft-danger rounded-pill px-4 fw-bold">
+                        <i class="bi bi-x-lg me-2"></i> Limpar Filtros
                     </button>
                 @endif
+                <button wire:click="$refresh" class="btn btn-soft-primary rounded-pill px-4 fw-bold ms-2">
+                    <i class="bi bi-arrow-clockwise me-2"></i> Atualizar
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Board Kanban -->
-    <div class="kanban-board">
-        <div class="row g-3">
-            <!-- Coluna Backlog -->
-            <div class="col-md-3">
-                <div class="kanban-column h-100">
-                    <div class="kanban-header bg-secondary text-white">
-                        <h5 class="mb-0">
-                            <i class="bi bi-list-ul"></i> Backlog
-                            <span class="badge bg-light text-dark ms-2">{{ count($tarefasBacklog) }}</span>
-                        </h5>
-                    </div>
-                    <div class="kanban-body" data-status="backlog">
-                        @forelse($tarefasBacklog as $tarefa)
-                            <div class="kanban-card" 
-                                 data-tarefa-id="{{ $tarefa['id'] }}" 
-                                 data-status="backlog"
-                                 draggable="true">
-                                <div class="card h-100">
-                                    <div class="card-body">
-                                        <h6 class="card-title">{{ $tarefa['titulo'] }}</h6>
-                                        @if($tarefa['descricao'])
-                                            <p class="card-text small text-muted">{{ Str::limit($tarefa['descricao'], 100) }}</p>
-                                        @endif
-                                        
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <small class="text-muted">
-                                                <i class="bi bi-folder"></i> {{ $tarefa['projeto']['titulo'] ?? 'Sem projeto' }}
-                                            </small>
-                                            @if($tarefa['data_vencimento'])
-                                                <small class="text-muted">
-                                                    <i class="bi bi-calendar"></i> {{ \Carbon\Carbon::parse($tarefa['data_vencimento'])->format('d/m/Y') }}
-                                                </small>
-                                            @endif
-                                        </div>
-                                        
-                                        @if($tarefa['responsavel'])
-                                            <div class="mb-2">
-                                                <small class="text-muted">
-                                                    <i class="bi bi-person"></i> {{ $tarefa['responsavel'] }}
-                                                </small>
-                                            </div>
-                                        @endif
-                                        
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <a href="{{ route('tarefas.edit', $tarefa['id']) }}" class="btn btn-sm btn-outline-primary">
-                                                <i class="bi bi-pencil"></i> Editar
-                                            </a>
-                                            <div class="kanban-actions">
-                                                <button class="btn btn-sm btn-outline-warning" 
-                                                        onclick="moverTarefa({{ $tarefa['id'] }}, 'pendente')"
-                                                        title="Mover para Pendente">
-                                                    <i class="bi bi-arrow-right"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="text-center text-muted py-4">
-                                <i class="bi bi-inbox display-4"></i>
-                                <p class="mt-2">Nenhuma tarefa em backlog</p>
-                            </div>
-                        @endforelse
-                    </div>
-                </div>
-            </div>
+    <div class="kanban-board-wrapper">
+        <div class="row g-4 flex-nowrap overflow-auto pb-4" style="min-height: 75vh;">
+            
+            <!-- Coluna: Backlog -->
+            @include('livewire.kanban.column', [
+                'title' => 'Backlog',
+                'icon' => 'list-ul',
+                'color' => 'secondary',
+                'status' => 'backlog',
+                'tarefas' => $tarefasBacklog
+            ])
 
-            <!-- Coluna Pendentes -->
-            <div class="col-md-3">
-                <div class="kanban-column h-100">
-                    <div class="kanban-header bg-warning text-dark">
-                        <h5 class="mb-0">
-                            <i class="bi bi-clock"></i> Pendentes
-                            <span class="badge bg-light text-dark ms-2">{{ count($tarefasPendentes) }}</span>
-                        </h5>
-                    </div>
-                    <div class="kanban-body" data-status="pendente">
-                        @forelse($tarefasPendentes as $tarefa)
-                            <div class="kanban-card" 
-                                 data-tarefa-id="{{ $tarefa['id'] }}" 
-                                 data-status="pendente"
-                                 draggable="true">
-                                <div class="card h-100">
-                                    <div class="card-body">
-                                        <h6 class="card-title">{{ $tarefa['titulo'] }}</h6>
-                                        @if($tarefa['descricao'])
-                                            <p class="card-text small text-muted">{{ Str::limit($tarefa['descricao'], 100) }}</p>
-                                        @endif
-                                        
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <small class="text-muted">
-                                                <i class="bi bi-folder"></i> {{ $tarefa['projeto']['titulo'] ?? 'Sem projeto' }}
-                                            </small>
-                                            @if($tarefa['data_vencimento'])
-                                                <small class="text-muted">
-                                                    <i class="bi bi-calendar"></i> {{ \Carbon\Carbon::parse($tarefa['data_vencimento'])->format('d/m/Y') }}
-                                                </small>
-                                            @endif
-                                        </div>
-                                        
-                                        @if($tarefa['responsavel'])
-                                            <div class="mb-2">
-                                                <small class="text-muted">
-                                                    <i class="bi bi-person"></i> {{ $tarefa['responsavel'] }}
-                                                </small>
-                                            </div>
-                                        @endif
-                                        
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <a href="{{ route('tarefas.edit', $tarefa['id']) }}" class="btn btn-sm btn-outline-primary">
-                                                <i class="bi bi-pencil"></i> Editar
-                                            </a>
-                                            <div class="kanban-actions">
-                                                <button class="btn btn-sm btn-outline-secondary me-1" 
-                                                        onclick="moverTarefa({{ $tarefa['id'] }}, 'backlog')"
-                                                        title="Voltar para Backlog">
-                                                    <i class="bi bi-arrow-left"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-info" 
-                                                        onclick="moverTarefa({{ $tarefa['id'] }}, 'em desenvolvimento')"
-                                                        title="Mover para Em Andamento">
-                                                    <i class="bi bi-arrow-right"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="text-center text-muted py-4">
-                                <i class="bi bi-inbox display-4"></i>
-                                <p class="mt-2">Nenhuma tarefa pendente</p>
-                            </div>
-                        @endforelse
-                    </div>
-                </div>
-            </div>
+            <!-- Coluna: Pendentes -->
+            @include('livewire.kanban.column', [
+                'title' => 'Pendentes',
+                'icon' => 'clock',
+                'color' => 'warning',
+                'status' => 'pendente',
+                'tarefas' => $tarefasPendentes
+            ])
 
-            <!-- Coluna Em Desenvolvimento -->
-            <div class="col-md-3">
-                <div class="kanban-column h-100">
-                    <div class="kanban-header bg-info text-white">
-                        <h5 class="mb-0">
-                            <i class="bi bi-gear"></i> Em Andamento
-                            <span class="badge bg-light text-dark ms-2">{{ count($tarefasEmDesenvolvimento) }}</span>
-                        </h5>
-                    </div>
-                    <div class="kanban-body" data-status="em desenvolvimento">
-                        @forelse($tarefasEmDesenvolvimento as $tarefa)
-                            <div class="kanban-card" 
-                                 data-tarefa-id="{{ $tarefa['id'] }}" 
-                                 data-status="em desenvolvimento"
-                                 draggable="true">
-                                <div class="card h-100">
-                                    <div class="card-body">
-                                        <h6 class="card-title">{{ $tarefa['titulo'] }}</h6>
-                                        @if($tarefa['descricao'])
-                                            <p class="card-text small text-muted">{{ Str::limit($tarefa['descricao'], 100) }}</p>
-                                        @endif
-                                        
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <small class="text-muted">
-                                                <i class="bi bi-folder"></i> {{ $tarefa['projeto']['titulo'] ?? 'Sem projeto' }}
-                                            </small>
-                                            @if($tarefa['data_vencimento'])
-                                                <small class="text-muted">
-                                                    <i class="bi bi-calendar"></i> {{ \Carbon\Carbon::parse($tarefa['data_vencimento'])->format('d/m/Y') }}
-                                                </small>
-                                            @endif
-                                        </div>
-                                        
-                                        @if($tarefa['responsavel'])
-                                            <div class="mb-2">
-                                                <small class="text-muted">
-                                                    <i class="bi bi-person"></i> {{ $tarefa['responsavel'] }}
-                                                </small>
-                                            </div>
-                                        @endif
-                                        
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <a href="{{ route('tarefas.edit', $tarefa['id']) }}" class="btn btn-sm btn-outline-primary">
-                                                <i class="bi bi-pencil"></i> Editar
-                                            </a>
-                                            <div class="kanban-actions">
-                                                <button class="btn btn-sm btn-outline-secondary me-1" 
-                                                        onclick="moverTarefa({{ $tarefa['id'] }}, 'backlog')"
-                                                        title="Voltar para Backlog">
-                                                    <i class="bi bi-arrow-left"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-warning me-1" 
-                                                        onclick="moverTarefa({{ $tarefa['id'] }}, 'pendente')"
-                                                        title="Voltar para Pendente">
-                                                    <i class="bi bi-arrow-left"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-success" 
-                                                        onclick="moverTarefa({{ $tarefa['id'] }}, 'concluida')"
-                                                        title="Marcar como Concluída">
-                                                    <i class="bi bi-check"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="text-center text-muted py-4">
-                                <i class="bi bi-inbox display-4"></i>
-                                <p class="mt-2">Nenhuma tarefa em andamento</p>
-                            </div>
-                        @endforelse
-                    </div>
-                </div>
-            </div>
+            <!-- Coluna: Em Andamento -->
+            @include('livewire.kanban.column', [
+                'title' => 'Em Andamento',
+                'icon' => 'gear',
+                'color' => 'info',
+                'status' => 'em desenvolvimento',
+                'tarefas' => $tarefasEmDesenvolvimento
+            ])
 
-            <!-- Coluna Concluídas -->
-            <div class="col-md-3">
-                <div class="kanban-column h-100">
-                    <div class="kanban-header bg-success text-white">
-                        <h5 class="mb-0">
-                            <i class="bi bi-check-circle"></i> Concluídas
-                            <span class="badge bg-light text-dark ms-2">{{ count($tarefasConcluidas) }}</span>
-                        </h5>
-                    </div>
-                    <div class="kanban-body" data-status="concluida">
-                        @forelse($tarefasConcluidas as $tarefa)
-                            <div class="kanban-card" 
-                                 data-tarefa-id="{{ $tarefa['id'] }}" 
-                                 data-status="concluida"
-                                 draggable="true">
-                                <div class="card h-100">
-                                    <div class="card-body">
-                                        <h6 class="card-title text-decoration-line-through">{{ $tarefa['titulo'] }}</h6>
-                                        @if($tarefa['descricao'])
-                                            <p class="card-text small text-muted">{{ Str::limit($tarefa['descricao'], 100) }}</p>
-                                        @endif
-                                        
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <small class="text-muted">
-                                                <i class="bi bi-folder"></i> {{ $tarefa['projeto']['titulo'] ?? 'Sem projeto' }}
-                                            </small>
-                                            @if($tarefa['data_vencimento'])
-                                                <small class="text-muted">
-                                                    <i class="bi bi-calendar"></i> {{ \Carbon\Carbon::parse($tarefa['data_vencimento'])->format('d/m/Y') }}
-                                                </small>
-                                            @endif
-                                        </div>
-                                        
-                                        @if($tarefa['responsavel'])
-                                            <div class="mb-2">
-                                                <small class="text-muted">
-                                                    <i class="bi bi-person"></i> {{ $tarefa['responsavel'] }}
-                                                </small>
-                                            </div>
-                                        @endif
-                                        
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <a href="{{ route('tarefas.edit', $tarefa['id']) }}" class="btn btn-sm btn-outline-primary">
-                                                <i class="bi bi-pencil"></i> Editar
-                                            </a>
-                                            <div class="kanban-actions">
-                                                <button class="btn btn-sm btn-outline-secondary me-1" 
-                                                        onclick="moverTarefa({{ $tarefa['id'] }}, 'backlog')"
-                                                        title="Voltar para Backlog">
-                                                    <i class="bi bi-arrow-left"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-warning me-1" 
-                                                        onclick="moverTarefa({{ $tarefa['id'] }}, 'pendente')"
-                                                        title="Voltar para Pendente">
-                                                    <i class="bi bi-arrow-left"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-info" 
-                                                        onclick="moverTarefa({{ $tarefa['id'] }}, 'em desenvolvimento')"
-                                                        title="Voltar para Em Andamento">
-                                                    <i class="bi bi-arrow-left"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="text-center text-muted py-4">
-                                <i class="bi bi-inbox display-4"></i>
-                                <p class="mt-2">Nenhuma tarefa concluída</p>
-                            </div>
-                        @endforelse
-                    </div>
-                </div>
-            </div>
+            <!-- Coluna: Concluídas -->
+            @include('livewire.kanban.column', [
+                'title' => 'Concluídas',
+                'icon' => 'check2-circle',
+                'color' => 'success',
+                'status' => 'concluida',
+                'tarefas' => $tarefasConcluidas
+            ])
+
         </div>
     </div>
 
     <style>
-    .kanban-board {
-        min-height: 70vh;
-    }
+        .kanban-board-wrapper {
+            margin: 0 -1.5rem;
+            padding: 0 1.5rem;
+        }
+        
+        .kanban-column-container {
+            min-width: 320px;
+            max-width: 320px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .kanban-col-header {
+            background: rgba(248, 249, 250, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px 20px 0 0;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+        }
+        
+        .kanban-col-body {
+            background: #f8f9fa;
+            border-radius: 0 0 20px 20px;
+            padding: 1rem;
+            flex-grow: 1;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            min-height: 600px;
+            max-height: calc(100vh - 280px);
+            overflow-y: auto;
+        }
+        
+        .kanban-item-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: grab;
+        }
+        
+        .kanban-item-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+            border-color: var(--primary-color);
+        }
+        
+        .kanban-item-card.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+        
+        .kanban-col-body.drag-over {
+            background: rgba(99, 102, 241, 0.05);
+            border: 2px dashed var(--primary-color);
+        }
 
-    .kanban-column {
-        background-color: #f8f9fa;
-        border-radius: 0.5rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
+        .user-initials {
+            width: 28px;
+            height: 28px;
+            background: var(--primary-light);
+            color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 800;
+        }
 
-    .kanban-header {
-        padding: 1rem;
-        border-radius: 0.5rem 0.5rem 0 0;
-        border-bottom: 1px solid rgba(255,255,255,0.2);
-    }
-
-    .kanban-body {
-        padding: 1rem;
-        min-height: 400px;
-        max-height: 70vh;
-        overflow-y: auto;
-    }
-
-    .kanban-card {
-        margin-bottom: 1rem;
-        cursor: move;
-        transition: all 0.2s ease;
-    }
-
-    .kanban-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-
-    .kanban-card.dragging {
-        opacity: 0.5;
-        transform: rotate(5deg);
-    }
-
-    .kanban-body.drag-over {
-        background-color: rgba(0,123,255,0.1);
-        border: 2px dashed #007bff;
-        border-radius: 0.5rem;
-    }
-
-    .kanban-actions {
-        display: flex;
-        gap: 0.25rem;
-    }
-
-    /* Scrollbar personalizada */
-    .kanban-body::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .kanban-body::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 3px;
-    }
-
-    .kanban-body::-webkit-scrollbar-thumb {
-        background: #c1c1c1;
-        border-radius: 3px;
-    }
-
-    .kanban-body::-webkit-scrollbar-thumb:hover {
-        background: #a8a8a8;
-    }
+        /* Scrollbar */
+        .kanban-col-body::-webkit-scrollbar {
+            width: 5px;
+        }
+        .kanban-col-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .kanban-col-body::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
     </style>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Configurar drag and drop
-        const cards = document.querySelectorAll('.kanban-card');
-        const columns = document.querySelectorAll('.kanban-body');
-        
-        cards.forEach(card => {
-            card.addEventListener('dragstart', handleDragStart);
-            card.addEventListener('dragend', handleDragEnd);
-        });
-        
-        columns.forEach(column => {
-            column.addEventListener('dragover', handleDragOver);
-            column.addEventListener('drop', handleDrop);
-            column.addEventListener('dragenter', handleDragEnter);
-            column.addEventListener('dragleave', handleDragLeave);
-        });
-    });
-
-    let draggedCard = null;
-
-    function handleDragStart(e) {
-        draggedCard = this;
-        this.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/html', this.outerHTML);
-    }
-
-    function handleDragEnd(e) {
-        this.classList.remove('dragging');
-        draggedCard = null;
-    }
-
-    function handleDragOver(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-    }
-
-    function handleDragEnter(e) {
-        e.preventDefault();
-        this.classList.add('drag-over');
-    }
-
-    function handleDragLeave(e) {
-        this.classList.remove('drag-over');
-    }
-
-    function handleDrop(e) {
-        e.preventDefault();
-        this.classList.remove('drag-over');
-        
-        if (draggedCard) {
-            const newStatus = this.dataset.status;
-            const oldStatus = draggedCard.dataset.status;
-            const tarefaId = draggedCard.dataset.tarefaId;
+        document.addEventListener('DOMContentLoaded', function() {
+            initKanban();
             
-            if (newStatus !== oldStatus) {
-                // Mover a tarefa via Livewire
-                moverTarefa(tarefaId, newStatus);
-            }
-        }
-    }
-
-    function moverTarefa(tarefaId, novoStatus) {
-        // Emitir evento para o Livewire
-        Livewire.dispatch('tarefa-movida', {
-            tarefaId: tarefaId,
-            novoStatus: novoStatus
+            Livewire.on('reinit-kanban', () => {
+                setTimeout(initKanban, 100);
+            });
         });
-    }
 
-    // Escutar eventos do Livewire
-    Livewire.on('tarefa-atualizada', (data) => {
-        // Mostrar notificação de sucesso
-        if (typeof createRealtimeNotification === 'function') {
-            createRealtimeNotification(
-                'success',
-                'Tarefa Movida',
-                `A tarefa "${data.titulo}" foi movida para ${data.novo_status}.`
-            );
+        function initKanban() {
+            const cards = document.querySelectorAll('.kanban-item-card');
+            const columns = document.querySelectorAll('.kanban-col-body');
+            
+            cards.forEach(card => {
+                card.addEventListener('dragstart', function(e) {
+                    this.classList.add('dragging');
+                    e.dataTransfer.setData('tarefaId', this.dataset.tarefaId);
+                    e.dataTransfer.setData('oldStatus', this.dataset.status);
+                });
+                
+                card.addEventListener('dragend', function() {
+                    this.classList.remove('dragging');
+                });
+            });
+            
+            columns.forEach(column => {
+                column.addEventListener('dragover', e => e.preventDefault());
+                
+                column.addEventListener('dragenter', function() {
+                    this.classList.add('drag-over');
+                });
+                
+                column.addEventListener('dragleave', function() {
+                    this.classList.remove('drag-over');
+                });
+                
+                column.addEventListener('drop', function(e) {
+                    this.classList.remove('drag-over');
+                    const tarefaId = e.dataTransfer.getData('tarefaId');
+                    const oldStatus = e.dataTransfer.getData('oldStatus');
+                    const newStatus = this.dataset.status;
+                    
+                    if (oldStatus !== newStatus) {
+                        Livewire.dispatch('tarefa-movida', {
+                            tarefaId: tarefaId,
+                            novoStatus: newStatus
+                        });
+                    }
+                });
+            });
         }
-    });
     </script>
 </div>

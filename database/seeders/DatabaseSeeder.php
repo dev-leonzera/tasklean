@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             ProjetoSeeder::class,
             TarefaSeeder::class,
+            TimeSeeder::class,
         ]);
     }
 }

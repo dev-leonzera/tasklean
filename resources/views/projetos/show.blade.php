@@ -4,280 +4,231 @@
 @section('page-title', $projeto->titulo)
 
 @section('actions')
-    <!-- Ações movidas para Ações Rápidas -->
+    <div class="d-flex gap-2">
+        <a href="{{ route('tarefas.create', ['projeto_id' => $projeto->id]) }}" class="btn btn-primary px-4 shadow-sm">
+            <i class="bi bi-plus-lg me-2"></i> Nova Tarefa
+        </a>
+        <a href="{{ route('projetos.edit', $projeto->id) }}" class="btn btn-secondary px-4 shadow-sm">
+            <i class="bi bi-pencil-square me-2"></i> Editar Projeto
+        </a>
+        <a href="{{ route('projetos.index') }}" class="btn btn-secondary px-4 shadow-sm">
+            <i class="bi bi-arrow-left me-2"></i> Voltar
+        </a>
+    </div>
 @endsection
 
 @section('content')
 <!-- Page Header -->
-<div class="row mb-4">
+<div class="row mb-5">
     <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3">
             <div>
-                <h1 class="h3 mb-1 fw-bold text-primary">
-                    <i class="bi bi-folder me-2"></i>{{ $projeto->titulo }}
+                <nav aria-label="breadcrumb" class="mb-2">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ route('projetos.index') }}" class="text-decoration-none text-muted">Projetos</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Dashboard do Projeto</li>
+                    </ol>
+                </nav>
+                <h1 class="h2 mb-1 fw-800 text-dark">
+                    {{ $projeto->titulo }}
                 </h1>
-                <p class="text-muted mb-0">Detalhes e gerenciamento do projeto</p>
+                <p class="text-muted mb-0">
+                    <i class="bi bi-person-badge me-1"></i> Responsável: <strong>{{ $projeto->responsavel->name ?? 'Sem responsável' }}</strong>
+                </p>
             </div>
-            <div class="d-flex align-items-center">
-                <span class="badge {{ $projeto->ativo ? 'bg-success' : 'bg-secondary' }} me-3">
+            <div class="d-flex flex-wrap gap-2">
+                <span class="badge-premium {{ $projeto->ativo ? 'success' : 'secondary' }} px-4 py-2 fs-6">
                     {{ $projeto->ativo ? 'Ativo' : 'Inativo' }}
                 </span>
-                <button class="btn btn-outline-primary">
-                    <i class="bi bi-download me-1"></i> Exportar
-                </button>
             </div>
         </div>
     </div>
 </div>
+
 <div class="row">
-    <div class="col-md-8">
-        <div class="chart-container mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="section-title mb-0">
-                    <i class="bi bi-info-circle me-2"></i>Informações do Projeto
-                </h5>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="info-item mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="bi bi-person text-primary me-2"></i>
-                            <span class="fw-semibold text-muted">Responsável</span>
-                        </div>
-                        <p class="mb-0">{{ $projeto->responsavel }}</p>
-                    </div>
-                    <div class="info-item mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="bi bi-calendar-plus text-primary me-2"></i>
-                            <span class="fw-semibold text-muted">Criado em</span>
-                        </div>
-                        <p class="mb-0">{{ $projeto->data_criacao->format('d/m/Y H:i') }}</p>
-                    </div>
-                    <div class="info-item mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="bi bi-clock text-primary me-2"></i>
-                            <span class="fw-semibold text-muted">Última atualização</span>
-                        </div>
-                        <p class="mb-0">{{ $projeto->updated_at->format('d/m/Y H:i') }}</p>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="info-item mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="bi bi-list-task text-primary me-2"></i>
-                            <span class="fw-semibold text-muted">Total de tarefas</span>
-                        </div>
-                        <p class="mb-0 fw-bold text-primary fs-5">{{ $projeto->tarefas->count() }}</p>
-                    </div>
-                    <div class="info-item mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="bi bi-hourglass-split text-warning me-2"></i>
-                            <span class="fw-semibold text-muted">Pendentes</span>
-                        </div>
-                        <p class="mb-0 fw-bold text-warning">{{ $projeto->tarefas->where('status', 'pendente')->count() }}</p>
-                    </div>
-                    <div class="info-item mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="bi bi-gear text-info me-2"></i>
-                            <span class="fw-semibold text-muted">Em desenvolvimento</span>
-                        </div>
-                        <p class="mb-0 fw-bold text-info">{{ $projeto->tarefas->where('status', 'em desenvolvimento')->count() }}</p>
-                    </div>
-                    <div class="info-item mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="bi bi-check-circle text-success me-2"></i>
-                            <span class="fw-semibold text-muted">Concluídas</span>
-                        </div>
-                        <p class="mb-0 fw-bold text-success">{{ $projeto->tarefas->where('status', 'concluida')->count() }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tarefas do Projeto -->
-        <div class="chart-container">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="section-title mb-0">
-                    <i class="bi bi-list-task me-2"></i>Tarefas do Projeto
-                </h5>
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-three-dots-vertical"></i>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Exportar</a></li>
-                        <li><a class="dropdown-item" href="#">Filtrar</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div>
-                @if($projeto->tarefas->count() > 0)
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead class="table-light">
-                                <tr>
-                                    <th class="fw-semibold">Título</th>
-                                    <th class="fw-semibold">Status</th>
-                                    <th class="fw-semibold">Responsável</th>
-                                    <th class="fw-semibold">Vencimento</th>
-                                    <th class="fw-semibold">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($projeto->tarefas as $tarefa)
-                                    <tr>
-                                        <td>
-                                            <a href="{{ route('tarefas.show', $tarefa->id) }}" class="text-decoration-none fw-semibold text-primary">
-                                                {{ $tarefa->titulo }}
-                                            </a>
-                                        </td>
-                                        <td>
-                                            @php
-                                                $statusClasses = [
-                                                    'backlog' => 'bg-secondary',
-                                                    'pendente' => 'bg-warning',
-                                                    'em desenvolvimento' => 'bg-info',
-                                                    'concluida' => 'bg-success'
-                                                ];
-                                                $statusLabels = [
-                                                    'backlog' => 'Backlog',
-                                                    'pendente' => 'Pendente',
-                                                    'em desenvolvimento' => 'Em Desenvolvimento',
-                                                    'concluida' => 'Concluída'
-                                                ];
-                                            @endphp
-                                            <span class="badge {{ $statusClasses[$tarefa->status] }} rounded-pill">
-                                                {{ $statusLabels[$tarefa->status] }}
-                                            </span>
-                                        </td>
-                                        <td class="text-muted">{{ $tarefa->responsavel }}</td>
-                                        <td>
-                                            @if($tarefa->data_vencimento)
-                                                @if($tarefa->isAtrasada())
-                                                    <span class="text-danger fw-semibold">
-                                                        <i class="bi bi-exclamation-triangle me-1"></i>
-                                                        {{ $tarefa->data_vencimento->format('d/m/Y') }}
-                                                    </span>
-                                                @else
-                                                    <span class="text-muted">{{ $tarefa->data_vencimento->format('d/m/Y') }}</span>
-                                                @endif
-                                            @else
-                                                <span class="text-muted">Sem vencimento</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="{{ route('tarefas.show', $tarefa->id) }}" 
-                                                   class="btn btn-outline-primary btn-sm" 
-                                                   title="Ver">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
-                                                <a href="{{ route('tarefas.edit', $tarefa->id) }}" 
-                                                   class="btn btn-outline-secondary btn-sm" 
-                                                   title="Editar">
-                                                    <i class="bi bi-pencil"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @else
-                    <div class="text-center py-4">
-                        <i class="bi bi-list-task display-4 text-muted"></i>
-                        <h5 class="mt-3 text-muted">Nenhuma tarefa encontrada</h5>
-                        <p class="text-muted">Este projeto ainda não possui tarefas.</p>
-                        <a href="{{ route('tarefas.create', ['projeto_id' => $projeto->id]) }}" class="btn btn-primary">
-                            <i class="bi bi-plus-circle"></i> Criar Primeira Tarefa
-                        </a>
-                    </div>
-                @endif
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <!-- Estatísticas -->
-        <div class="chart-container mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="section-title mb-0">
-                    <i class="bi bi-graph-up me-2"></i>Estatísticas
-                </h5>
-            </div>
+    <div class="col-lg-8">
+        <!-- Estatísticas Rápidas -->
+        <div class="row g-4 mb-4">
             @php
                 $totalTarefas = $projeto->tarefas->count();
                 $concluidas = $projeto->tarefas->where('status', 'concluida')->count();
                 $percentualConcluido = $totalTarefas > 0 ? ($concluidas / $totalTarefas) * 100 : 0;
             @endphp
-            
-            <div class="mb-4">
-                <div class="d-flex justify-content-between mb-2">
-                    <span class="fw-semibold text-muted">Progresso Geral</span>
-                    <span class="fw-bold text-primary">{{ number_format($percentualConcluido, 1) }}%</span>
-                </div>
-                <div class="progress-bar-custom">
-                    <div class="progress-fill primary" style="width: {{ $percentualConcluido }}%"></div>
+            <div class="col-md-4">
+                <div class="metric-card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="task-card-icon primary">
+                            <i class="bi bi-list-task"></i>
+                        </div>
+                    </div>
+                    <div class="h3 fw-800 mb-1">{{ $totalTarefas }}</div>
+                    <div class="text-muted small fw-bold text-uppercase">Total de Tarefas</div>
                 </div>
             </div>
+            <div class="col-md-4">
+                <div class="metric-card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="task-card-icon success">
+                            <i class="bi bi-check2-circle"></i>
+                        </div>
+                    </div>
+                    <div class="h3 fw-800 mb-1">{{ $concluidas }}</div>
+                    <div class="text-muted small fw-bold text-uppercase">Concluídas</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="metric-card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="task-card-icon info">
+                            <i class="bi bi-percent"></i>
+                        </div>
+                    </div>
+                    <div class="h3 fw-800 mb-1">{{ round($percentualConcluido) }}%</div>
+                    <div class="text-muted small fw-bold text-uppercase">Progresso</div>
+                </div>
+            </div>
+        </div>
 
-            <div class="row g-3">
-                <div class="col-4">
-                    <div class="stat-card text-center p-3 border rounded-3">
-                        <div class="text-warning fs-3 fw-bold">{{ $projeto->tarefas->where('status', 'pendente')->count() }}</div>
-                        <small class="text-muted fw-semibold">Pendentes</small>
+        <!-- Lista de Tarefas -->
+        <div class="chart-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="section-title mb-0">
+                    <i class="bi bi-list-check"></i> Tarefas do Projeto
+                </h5>
+                <a href="{{ route('tarefas.create', ['projeto_id' => $projeto->id]) }}" class="btn btn-sm btn-soft-primary rounded-pill px-3 fw-bold">
+                    <i class="bi bi-plus-lg me-1"></i> Nova Tarefa
+                </a>
+            </div>
+
+            @if($projeto->tarefas->count() > 0)
+                <div class="activity-list">
+                    @foreach($projeto->tarefas as $tarefa)
+                        <div class="activity-item bg-white border-0 shadow-sm p-4 rounded-4 mb-3 transition-all hover-translate-y">
+                            <div class="row align-items-center">
+                                <div class="col-md-7">
+                                    <div class="d-flex align-items-center">
+                                        @php
+                                            $statusColor = match($tarefa->status) {
+                                                'backlog' => 'secondary',
+                                                'pendente' => 'warning',
+                                                'em desenvolvimento' => 'info',
+                                                'concluida' => 'success',
+                                                default => 'primary'
+                                            };
+                                        @endphp
+                                        <div class="task-card-icon {{ $statusColor }} me-3" style="width: 40px; height: 40px;">
+                                            <i class="bi bi-{{ $tarefa->status === 'concluida' ? 'check-lg' : 'list-task' }}"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold text-dark mb-1">
+                                                <a href="{{ route('tarefas.show', $tarefa->id) }}" class="text-decoration-none text-dark hover-primary">
+                                                    {{ $tarefa->titulo }}
+                                                </a>
+                                            </h6>
+                                            <div class="text-muted small">
+                                                <i class="bi bi-person me-1"></i> {{ $tarefa->responsavel->name ?? 'Sem responsável' }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <span class="badge-premium {{ $statusColor }} py-1 px-3" style="font-size: 0.7rem;">
+                                        {{ ucfirst($tarefa->status) }}
+                                    </span>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <a href="{{ route('tarefas.show', $tarefa->id) }}" class="btn btn-light btn-sm rounded-circle" style="width: 32px; height: 32px; padding: 0; line-height: 32px;">
+                                        <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="text-center py-5 border rounded-4 border-dashed bg-light">
+                    <i class="bi bi-journal-x text-muted opacity-25 fs-1 mb-3"></i>
+                    <p class="text-muted mb-4">Este projeto ainda não possui tarefas cadastradas.</p>
+                    <a href="{{ route('tarefas.create', ['projeto_id' => $projeto->id]) }}" class="btn btn-primary px-4 py-2 rounded-pill fw-bold">
+                        Começar Agora
+                    </a>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Detalhes do Projeto -->
+        <div class="chart-container mb-4">
+            <h5 class="section-title mb-4">
+                <i class="bi bi-info-circle"></i> Sobre o Projeto
+            </h5>
+            <div class="activity-list">
+                <div class="activity-item">
+                    <div class="task-card-icon primary">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold text-dark">Data de Lançamento</div>
+                        <div class="text-muted small">{{ $projeto->data_criacao->format('d/m/Y') }}</div>
                     </div>
                 </div>
-                <div class="col-4">
-                    <div class="stat-card text-center p-3 border rounded-3">
-                        <div class="text-info fs-3 fw-bold">{{ $projeto->tarefas->where('status', 'em desenvolvimento')->count() }}</div>
-                        <small class="text-muted fw-semibold">Em Dev</small>
+                <div class="activity-item">
+                    <div class="task-card-icon info">
+                        <i class="bi bi-clock-history"></i>
                     </div>
-                </div>
-                <div class="col-4">
-                    <div class="stat-card text-center p-3 border rounded-3">
-                        <div class="text-success fs-3 fw-bold">{{ $projeto->tarefas->where('status', 'concluida')->count() }}</div>
-                        <small class="text-muted fw-semibold">Concluídas</small>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold text-dark">Última Modificação</div>
+                        <div class="text-muted small">{{ $projeto->updated_at->diffForHumans() }}</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Ações Rápidas -->
-        <div class="chart-container">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="section-title mb-0">
-                    <i class="bi bi-lightning me-2"></i>Ações Rápidas
-                </h5>
-            </div>
-            <div class="d-grid gap-2">
-                <a href="{{ route('tarefas.create', ['projeto_id' => $projeto->id]) }}" class="btn btn-success">
-                    <i class="bi bi-plus-circle me-1"></i> Nova Tarefa
-                </a>
-                
+        <!-- Ações do Projeto -->
+        <div class="chart-container mb-4">
+            <h5 class="section-title mb-4">
+                <i class="bi bi-lightning-charge"></i> Operações
+            </h5>
+            <div class="d-grid gap-3">
                 @if($projeto->ativo)
-                    <form action="{{ route('projetos.inativar', $projeto->id) }}" method="POST">
+                    <form action="{{ route('projetos.inativar', $projeto->id) }}" method="POST" class="d-grid">
                         @csrf
                         @method('PATCH')
-                        <button type="submit" class="btn btn-warning w-100">
-                            <i class="bi bi-pause me-1"></i> Inativar Projeto
+                        <button type="submit" class="btn btn-light text-warning fw-bold py-3 rounded-pill border">
+                            <i class="bi bi-pause-circle me-2"></i> Inativar Projeto
                         </button>
                     </form>
                 @else
-                    <form action="{{ route('projetos.ativar', $projeto->id) }}" method="POST">
+                    <form action="{{ route('projetos.ativar', $projeto->id) }}" method="POST" class="d-grid">
                         @csrf
                         @method('PATCH')
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="bi bi-play me-1"></i> Ativar Projeto
+                        <button type="submit" class="btn btn-light text-success fw-bold py-3 rounded-pill border">
+                            <i class="bi bi-play-circle me-2"></i> Ativar Projeto
                         </button>
                     </form>
                 @endif
                 
-                <a href="{{ route('projetos.edit', $projeto->id) }}" class="btn btn-outline-primary">
-                    <i class="bi bi-pencil me-1"></i> Editar Projeto
+                <a href="{{ route('projetos.edit', $projeto->id) }}" class="btn btn-light fw-bold py-3 rounded-pill border">
+                    <i class="bi bi-pencil me-2"></i> Configurações do Projeto
                 </a>
             </div>
+        </div>
+
+        <!-- Zona de Risco -->
+        <div class="chart-container border-dashed border-danger bg-soft-danger bg-opacity-10">
+            <h5 class="section-title text-danger mb-4">
+                <i class="bi bi-exclamation-triangle"></i> Zona Crítica
+            </h5>
+            <p class="text-muted small mb-4">A exclusão de um projeto removerá permanentemente todas as suas tarefas e dados relacionados.</p>
+            <form action="{{ route('projetos.destroy', $projeto->id) }}" method="POST">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger w-100 fw-bold py-3 rounded-pill" 
+                        onclick="return confirm('Tem certeza que deseja excluir este projeto permanentemente? Esta ação não pode ser desfeita.')">
+                    <i class="bi bi-trash me-2"></i> Excluir Projeto
+                </button>
+            </form>
         </div>
     </div>
 </div>

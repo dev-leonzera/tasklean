@@ -5,24 +5,48 @@ namespace App\Http\Controllers;
 use App\Models\Tarefa;
 use App\Models\Projeto;
 use App\Helpers\NotificationHelper;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 class TarefaController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Lista todas as tarefas
      *
      * @return \Illuminate\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $tarefas = Tarefa::where('user_id', Auth::id())
-            ->with(['projeto', 'responsavel'])
-            ->get();
+        $query = Tarefa::accessibleBy(Auth::user())->with(['projeto', 'responsavel']);
+
+        // Filtro por status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filtro por projeto
+        if ($request->filled('projeto_id')) {
+            $query->where('projeto_id', $request->projeto_id);
+        }
+
+        // Filtro por busca
+        if ($request->filled('busca')) {
+            $busca = $request->busca;
+            $query->where(function($q) use ($busca) {
+                $q->where('titulo', 'like', "%{$busca}%")
+                  ->orWhereHas('responsavel', function($qr) use ($busca) {
+                      $qr->where('name', 'like', "%{$busca}%");
+                  });
+            });
+        }
+
+        $tarefas = $query->latest()->paginate(15);
+        $projetos = Projeto::accessibleBy(Auth::user())->ativos()->orderBy('titulo')->get();
         
-        return view('tarefas.index', compact('tarefas'));
+        return view('tarefas.index', compact('tarefas', 'projetos'));
     }
 
     /**
@@ -30,9 +54,29 @@ class TarefaController extends Controller
      */
     public function create()
     {
-        $projetos = Projeto::where('user_id', Auth::id())->ativos()->get();
-        $usuarios = \App\Models\User::all();
+        $projetos = Projeto::where('user_id', Auth::id())
+            ->orWhereHas('time', function($q) {
+                $q->where('owner_id', Auth::id())
+                  ->orWhereHas('membros', function($m) {
+                      $m->where('user_id', Auth::id());
+                  });
+            })
+            ->ativos()->get();
+            
         $projetoId = request('projeto_id');
+        $usuarios = \App\Models\User::orderBy('name')->take(50)->get();
+
+        if ($projetoId) {
+            $projeto = Projeto::find($projetoId);
+            if ($projeto && $projeto->time_id) {
+                // Se o projeto tem time, carregar membros do time
+                $usuarios = $projeto->time->membros()->orderBy('name')->get();
+                // Incluir o dono do time também se não estiver na lista de membros
+                if (!$usuarios->contains($projeto->time->owner_id)) {
+                    $usuarios->push($projeto->time->owner);
+                }
+            }
+        }
         
         return view('tarefas.create', compact('projetos', 'usuarios', 'projetoId'));
     }
@@ -53,6 +97,21 @@ class TarefaController extends Controller
             'responsavel_id' => 'required|exists:users,id',
             'projeto_id' => 'required|exists:projetos,id'
         ]);
+
+        $projeto = Projeto::findOrFail($request->projeto_id);
+        
+        // Autorização básica: usuário deve ter acesso ao projeto
+        $this->authorize('view', $projeto);
+
+        // Validação de segurança: se o projeto tem um time, o responsável deve ser membro do time
+        if ($projeto->time_id) {
+            $isMembro = $projeto->time->membros()->where('user_id', $request->responsavel_id)->exists() ||
+                        $projeto->time->owner_id === (int)$request->responsavel_id;
+            
+            if (!$isMembro) {
+                return back()->withErrors(['responsavel_id' => 'O responsável deve ser um membro do time do projeto.'])->withInput();
+            }
+        }
 
         $tarefa = Tarefa::create([
             'titulo' => $request->titulo,
@@ -94,9 +153,9 @@ class TarefaController extends Controller
      */
     public function show(int $id)
     {
-        $tarefa = Tarefa::where('user_id', Auth::id())
-            ->with(['projeto', 'responsavel', 'comentarios.user'])
-            ->find($id);
+        $tarefa = Tarefa::with(['projeto', 'responsavel', 'comentarios.user'])->findOrFail($id);
+
+        $this->authorize('view', $tarefa);
 
         if (!$tarefa) {
             return redirect()->route('tarefas.index')->with('error', 'Tarefa não encontrada!');
@@ -113,14 +172,16 @@ class TarefaController extends Controller
      */
     public function edit(int $id)
     {
-        $tarefa = Tarefa::where('user_id', Auth::id())->find($id);
+        $tarefa = Tarefa::findOrFail($id);
+        
+        $this->authorize('update', $tarefa);
         
         if (!$tarefa) {
             return redirect()->route('tarefas.index')->with('error', 'Tarefa não encontrada!');
         }
         
-        $projetos = Projeto::where('user_id', Auth::id())->ativos()->get();
-        $usuarios = \App\Models\User::all();
+        $projetos = Projeto::accessibleBy(Auth::user())->ativos()->get();
+        $usuarios = \App\Models\User::orderBy('name')->take(50)->get();
         
         return view('tarefas.edit', compact('tarefa', 'projetos', 'usuarios'));
     }
@@ -134,11 +195,9 @@ class TarefaController extends Controller
      */
     public function update(Request $request, int $id)
     {
-        $tarefa = Tarefa::where('user_id', Auth::id())->find($id);
+        $tarefa = Tarefa::accessibleBy(Auth::user())->findOrFail($id);
 
-        if (!$tarefa) {
-            return redirect()->route('tarefas.index')->with('error', 'Tarefa não encontrada!');
-        }
+        $this->authorize('update', $tarefa);
 
         $request->validate([
             'titulo' => 'sometimes|string|max:255',
@@ -164,11 +223,9 @@ class TarefaController extends Controller
      */
     public function destroy(int $id)
     {
-        $tarefa = Tarefa::where('user_id', Auth::id())->find($id);
+        $tarefa = Tarefa::accessibleBy(Auth::user())->findOrFail($id);
 
-        if (!$tarefa) {
-            return redirect()->route('tarefas.index')->with('error', 'Tarefa não encontrada!');
-        }
+        $this->authorize('delete', $tarefa);
 
         $tarefa->delete();
 
@@ -184,11 +241,9 @@ class TarefaController extends Controller
      */
     public function alterarStatus(Request $request, int $id)
     {
-        $tarefa = Tarefa::where('user_id', Auth::id())->find($id);
+        $tarefa = Tarefa::accessibleBy(Auth::user())->findOrFail($id);
 
-        if (!$tarefa) {
-            return redirect()->route('tarefas.index')->with('error', 'Tarefa não encontrada!');
-        }
+        $this->authorize('update', $tarefa);
 
         $request->validate([
             'status' => 'required|in:backlog,pendente,em desenvolvimento,concluida'
@@ -218,7 +273,7 @@ class TarefaController extends Controller
      */
     public function porProjeto(int $projetoId): JsonResponse
     {
-        $projeto = Projeto::where('user_id', Auth::id())->find($projetoId);
+        $projeto = Projeto::accessibleBy(Auth::user())->find($projetoId);
 
         if (!$projeto) {
             return response()->json([
@@ -227,7 +282,7 @@ class TarefaController extends Controller
             ], 404);
         }
 
-        $tarefas = $projeto->tarefas()->where('user_id', Auth::id())->get();
+        $tarefas = $projeto->tarefas()->get();
         
         return response()->json([
             'success' => true,

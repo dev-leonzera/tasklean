@@ -5,224 +5,195 @@
 @section('content')
 <style>
     @media print {
-        .no-print {
-            display: none !important;
+        .no-print { display: none !important; }
+        body { background: white !important; }
+        .chart-container { 
+            box-shadow: none !important; 
+            border: 1px solid #eee !important;
+            margin-bottom: 2rem !important;
         }
-        body {
-            background: white;
-        }
-        .card {
-            border: none;
-            box-shadow: none;
-        }
+        .metric-card { border: 1px solid #eee !important; }
     }
-    .report-header {
-        border-bottom: 2px solid #10b981;
-        padding-bottom: 1rem;
-        margin-bottom: 2rem;
-    }
-    .stat-card {
-        border-left: 4px solid #10b981;
-        background: #f8f9fa;
+    .report-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 0.7rem;
+        text-transform: uppercase;
     }
 </style>
 
-<div class="no-print mb-4">
-    <div class="d-flex justify-content-between align-items-center">
+<div class="no-print mb-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
         <div>
-            <h1 class="h3 mb-1 fw-bold text-primary">
-                <i class="bi bi-folder me-2"></i>Relatório de Projetos
-            </h1>
-            <p class="text-muted mb-0">Gerado em {{ now()->format('d/m/Y H:i') }}</p>
+            <nav aria-label="breadcrumb" class="mb-2">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ route('relatorios.index') }}" class="text-decoration-none text-muted">Relatórios</a></li>
+                    <li class="breadcrumb-item active">Projetos</li>
+                </ol>
+            </nav>
+            <h1 class="h2 mb-1 fw-800 text-dark">Relatório de Projetos</h1>
+            <p class="text-muted mb-0">Extração de dados consolidada para análise de performance.</p>
         </div>
-        <div>
-            <button onclick="window.print()" class="btn btn-primary me-2">
-                <i class="bi bi-printer me-1"></i> Imprimir
+        <div class="d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-primary px-4 rounded-pill shadow-sm">
+                <i class="bi bi-printer me-2"></i> Imprimir / PDF
             </button>
-            <a href="{{ route('relatorios.index') }}" class="btn btn-secondary">
-                <i class="bi bi-arrow-left me-1"></i> Voltar
+            <a href="{{ route('relatorios.index') }}" class="btn btn-secondary px-4 rounded-pill">
+                <i class="bi bi-arrow-left me-2"></i> Voltar
             </a>
         </div>
     </div>
 </div>
 
-<!-- Cabeçalho do Relatório -->
-<div class="report-header">
-    <div class="row">
-        <div class="col-md-8">
-            <p class="text-muted mb-0">
-                @if($request->filled('status'))
-                    <strong>Status:</strong> {{ $request->status === 'ativo' ? 'Ativos' : 'Inativos' }}
-                @else
-                    <strong>Todos os projetos</strong>
-                @endif
-                @if($request->filled('data_inicio') || $request->filled('data_fim'))
-                    | <strong>Período:</strong> 
-                    {{ $request->data_inicio ? \Carbon\Carbon::parse($request->data_inicio)->format('d/m/Y') : 'Início' }}
-                    até
-                    {{ $request->data_fim ? \Carbon\Carbon::parse($request->data_fim)->format('d/m/Y') : 'Fim' }}
-                @endif
-            </p>
+<!-- Header do Relatório (Apenas Impressão ou Visualização) -->
+<div class="chart-container mb-4 py-4 bg-light bg-opacity-50 border-0">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <div class="d-flex align-items-center">
+                <div class="task-card-icon primary me-3">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                </div>
+                <div>
+                    <h5 class="fw-800 text-dark mb-0">Consolidado de Projetos</h5>
+                    <p class="text-muted small mb-0">Filtros aplicados: 
+                        <strong>{{ $request->status ? ucfirst($request->status) : 'Todos' }}</strong>
+                        @if($request->data_inicio) | Início: {{ \Carbon\Carbon::parse($request->data_inicio)->format('d/m/Y') }} @endif
+                        @if($request->data_fim) | Fim: {{ \Carbon\Carbon::parse($request->data_fim)->format('d/m/Y') }} @endif
+                    </p>
+                </div>
+            </div>
         </div>
-        <div class="col-md-4 text-end">
-            <p class="mb-0"><strong>Usuário:</strong> {{ auth()->user()->name }}</p>
-            <p class="mb-0"><strong>Data:</strong> {{ now()->format('d/m/Y H:i') }}</p>
+        <div class="col-md-6 text-md-end">
+            <p class="mb-0 text-muted small">Gerado por <strong>{{ auth()->user()->name }}</strong></p>
+            <p class="mb-0 text-muted small">Data: {{ now()->format('d/m/Y H:i') }}</p>
         </div>
     </div>
 </div>
 
-<!-- Estatísticas -->
-<div class="row mb-4">
-    <div class="col-md-3 mb-3">
-        <div class="card stat-card">
-            <div class="card-body">
-                <h6 class="text-muted mb-2">Total de Projetos</h6>
-                <h3 class="mb-0">{{ $estatisticas['total'] }}</h3>
-            </div>
+<!-- Métricas de Resumo -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="metric-card p-4 h-100">
+            <div class="text-muted small fw-bold text-uppercase mb-2">Total Projetos</div>
+            <div class="h2 fw-800 text-dark mb-0">{{ $estatisticas['total'] }}</div>
         </div>
     </div>
-    <div class="col-md-3 mb-3">
-        <div class="card stat-card" style="border-left-color: #10b981;">
-            <div class="card-body">
-                <h6 class="text-muted mb-2">Projetos Ativos</h6>
-                <h3 class="mb-0 text-success">{{ $estatisticas['ativos'] }}</h3>
-            </div>
+    <div class="col-md-3">
+        <div class="metric-card p-4 h-100">
+            <div class="text-muted small fw-bold text-uppercase mb-2">Projetos Ativos</div>
+            <div class="h2 fw-800 text-success mb-0">{{ $estatisticas['ativos'] }}</div>
         </div>
     </div>
-    <div class="col-md-3 mb-3">
-        <div class="card stat-card" style="border-left-color: #6c757d;">
-            <div class="card-body">
-                <h6 class="text-muted mb-2">Projetos Inativos</h6>
-                <h3 class="mb-0 text-secondary">{{ $estatisticas['inativos'] }}</h3>
-            </div>
+    <div class="col-md-3">
+        <div class="metric-card p-4 h-100">
+            <div class="text-muted small fw-bold text-uppercase mb-2">Total Tarefas</div>
+            <div class="h2 fw-800 text-info mb-0">{{ $estatisticas['total_tarefas'] }}</div>
         </div>
     </div>
-    <div class="col-md-3 mb-3">
-        <div class="card stat-card" style="border-left-color: #3182ce;">
-            <div class="card-body">
-                <h6 class="text-muted mb-2">Total de Tarefas</h6>
-                <h3 class="mb-0 text-info">{{ $estatisticas['total_tarefas'] }}</h3>
-            </div>
+    <div class="col-md-3">
+        <div class="metric-card p-4 h-100">
+            <div class="text-muted small fw-bold text-uppercase mb-2">Taxa Conclusão</div>
+            @php
+                $taxa = $estatisticas['total_tarefas'] > 0 ? round(($projetos->sum('tarefas_concluidas') / $estatisticas['total_tarefas']) * 100) : 0;
+            @endphp
+            <div class="h2 fw-800 text-primary mb-0">{{ $taxa }}%</div>
         </div>
     </div>
 </div>
 
-<!-- Tabela de Projetos -->
-<div class="card">
-    <div class="card-header bg-white">
-        <h5 class="mb-0">Detalhamento dos Projetos</h5>
+<!-- Tabela Detalhada -->
+<div class="chart-container p-0 overflow-hidden mb-5">
+    <div class="p-4 border-bottom bg-light bg-opacity-50">
+        <h6 class="fw-800 text-dark mb-0">Detalhamento dos Ativos</h6>
     </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr class="bg-light bg-opacity-50">
+                    <th class="ps-4 py-3 fw-800 text-muted small text-uppercase">Título do Projeto</th>
+                    <th class="py-3 fw-800 text-muted small text-uppercase">Status</th>
+                    <th class="py-3 fw-800 text-muted small text-uppercase">Gestor</th>
+                    <th class="py-3 fw-800 text-muted small text-uppercase text-center">Tarefas (C/T)</th>
+                    <th class="pe-4 py-3 fw-800 text-muted small text-uppercase">Progresso</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($projetos as $projeto)
                     <tr>
-                        <th>Projeto</th>
-                        <th>Status</th>
-                        <th>Responsável</th>
-                        <th>Data Criação</th>
-                        <th class="text-center">Tarefas</th>
-                        <th class="text-center">Concluídas</th>
-                        <th class="text-center">Progresso</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($projetos as $projeto)
-                        <tr>
-                            <td>
-                                <strong>{{ $projeto->titulo }}</strong>
-                            </td>
-                            <td>
-                                @if($projeto->ativo)
-                                    <span class="badge bg-success">Ativo</span>
-                                @else
-                                    <span class="badge bg-secondary">Inativo</span>
-                                @endif
-                            </td>
-                            <td>{{ $projeto->responsavel ?? '-' }}</td>
-                            <td>{{ $projeto->data_criacao->format('d/m/Y') }}</td>
-                            <td class="text-center">
-                                <span class="badge bg-info">{{ $projeto->total_tarefas }}</span>
-                            </td>
-                            <td class="text-center">
-                                <span class="badge bg-success">{{ $projeto->tarefas_concluidas }}</span>
-                            </td>
-                            <td>
-                                <div class="progress" style="height: 20px;">
-                                    <div class="progress-bar bg-success" role="progressbar" 
-                                         style="width: {{ $projeto->percentual_concluido }}%"
-                                         aria-valuenow="{{ $projeto->percentual_concluido }}" 
-                                         aria-valuemin="0" 
-                                         aria-valuemax="100">
-                                        {{ $projeto->percentual_concluido }}%
-                                    </div>
+                        <td class="ps-4">
+                            <div class="fw-bold text-dark">{{ $projeto->titulo }}</div>
+                            <div class="text-muted small">Criado em {{ $projeto->data_criacao->format('d/m/Y') }}</div>
+                        </td>
+                        <td>
+                            <span class="report-badge {{ $projeto->ativo ? 'bg-soft-success text-success' : 'bg-soft-secondary text-secondary' }}" style="background: var(--{{ $projeto->ativo ? 'success' : 'secondary' }}-light)">
+                                {{ $projeto->ativo ? 'Ativo' : 'Inativo' }}
+                            </span>
+                        </td>
+                        <td>{{ $projeto->responsavel ?? 'Não definido' }}</td>
+                        <td class="text-center">
+                            <span class="fw-bold text-primary">{{ $projeto->tarefas_concluidas }}</span>
+                            <span class="text-muted">/ {{ $projeto->total_tarefas }}</span>
+                        </td>
+                        <td class="pe-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" style="height: 8px; border-radius: 10px;">
+                                    <div class="progress-bar bg-success rounded-pill" style="width: {{ $projeto->percentual_concluido }}%"></div>
                                 </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">
-                                <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-                                <p class="mt-2 mb-0">Nenhum projeto encontrado com os filtros aplicados</p>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                                <span class="fw-bold text-dark small" style="min-width: 35px;">{{ $projeto->percentual_concluido }}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <p class="text-muted mb-0">Nenhum registro encontrado para os filtros selecionados.</p>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
 
-<!-- Detalhamento por Status -->
-@if($projetos->count() > 0)
-<div class="row mt-4">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-white">
-                <h6 class="mb-0">Distribuição por Status</h6>
-            </div>
-            <div class="card-body">
-                <canvas id="statusChart" height="200"></canvas>
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="chart-container">
+            <h6 class="fw-800 text-dark mb-4">Volume de Tarefas por Status</h6>
+            <div class="activity-list">
+                @php
+                    $statusMapping = [
+                        ['label' => 'Backlog', 'value' => $projetos->sum('tarefas_backlog'), 'color' => 'secondary'],
+                        ['label' => 'Pendentes', 'value' => $projetos->sum('tarefas_pendentes'), 'color' => 'warning'],
+                        ['label' => 'Em Execução', 'value' => $projetos->sum('tarefas_em_desenvolvimento'), 'color' => 'info'],
+                        ['label' => 'Concluídas', 'value' => $projetos->sum('tarefas_concluidas'), 'color' => 'success'],
+                    ];
+                @endphp
+                @foreach($statusMapping as $item)
+                    <div class="activity-item bg-light bg-opacity-50 p-3 rounded-4 mb-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="task-card-icon {{ $item['color'] }} bg-opacity-10 me-3" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                    <i class="bi bi-circle-fill"></i>
+                                </div>
+                                <span class="fw-bold text-dark">{{ $item['label'] }}</span>
+                            </div>
+                            <span class="h6 fw-800 text-dark mb-0">{{ $item['value'] }}</span>
+                        </div>
+                    </div>
+                @endforeach
             </div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-white">
-                <h6 class="mb-0">Tarefas por Status</h6>
-            </div>
-            <div class="card-body">
-                <ul class="list-unstyled mb-0">
-                    <li class="mb-2">
-                        <div class="d-flex justify-content-between">
-                            <span>Backlog:</span>
-                            <strong>{{ $projetos->sum('tarefas_backlog') }}</strong>
-                        </div>
-                    </li>
-                    <li class="mb-2">
-                        <div class="d-flex justify-content-between">
-                            <span>Pendentes:</span>
-                            <strong>{{ $projetos->sum('tarefas_pendentes') }}</strong>
-                        </div>
-                    </li>
-                    <li class="mb-2">
-                        <div class="d-flex justify-content-between">
-                            <span>Em Desenvolvimento:</span>
-                            <strong>{{ $projetos->sum('tarefas_em_desenvolvimento') }}</strong>
-                        </div>
-                    </li>
-                    <li class="mb-2">
-                        <div class="d-flex justify-content-between">
-                            <span>Concluídas:</span>
-                            <strong class="text-success">{{ $projetos->sum('tarefas_concluidas') }}</strong>
-                        </div>
-                    </li>
-                </ul>
+    <div class="col-lg-6 no-print">
+        <div class="chart-container h-100">
+            <h6 class="fw-800 text-dark mb-4">Distribuição de Status</h6>
+            <div style="height: 250px;">
+                <canvas id="statusChart"></canvas>
             </div>
         </div>
     </div>
 </div>
-@endif
 @endsection
 
 @section('scripts')
@@ -237,16 +208,20 @@
                 labels: ['Ativos', 'Inativos'],
                 datasets: [{
                     data: [{{ $estatisticas['ativos'] }}, {{ $estatisticas['inativos'] }}],
-                    backgroundColor: ['#10b981', '#6c757d']
+                    backgroundColor: ['#10b981', '#cbd5e1'],
+                    borderWidth: 0,
+                    hoverOffset: 10
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
             }
         });
     }
     @endif
 </script>
 @endsection
-

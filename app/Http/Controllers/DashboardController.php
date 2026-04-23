@@ -25,40 +25,41 @@ class DashboardController extends Controller
         // Elas serão verificadas apenas quando solicitado pelo usuário
         
         // Estatísticas gerais do usuário
-        $totalProjetos = Projeto::where('user_id', $user->id)->count();
-        $projetosAtivos = Projeto::where('user_id', $user->id)->ativos()->count();
-        $totalTarefas = Tarefa::where('user_id', $user->id)->count();
+        $totalProjetos = Projeto::accessibleBy($user)->count();
+        $projetosAtivos = Projeto::accessibleBy($user)->ativos()->count();
+        $totalTarefas = Tarefa::accessibleBy($user)->count();
         
         // Tarefas por status do usuário
-        $tarefasBacklog = Tarefa::where('user_id', $user->id)->backlog()->count();
-        $tarefasPendentes = Tarefa::where('user_id', $user->id)->pendentes()->count();
-        $tarefasConcluidas = Tarefa::where('user_id', $user->id)->concluidas()->count();
+        $tarefasBacklog = Tarefa::accessibleBy($user)->backlog()->count();
+        $tarefasPendentes = Tarefa::accessibleBy($user)->pendentes()->count();
+        $tarefasConcluidas = Tarefa::accessibleBy($user)->concluidas()->count();
         
         // Tarefas atrasadas do usuário
-        $tarefasAtrasadas = Tarefa::where('user_id', $user->id)
+        $tarefasAtrasadas = Tarefa::accessibleBy($user)
             ->atrasadas()
-            ->with('projeto')
+            ->with(['projeto', 'responsavel'])
+            ->latest()
+            ->take(10)
             ->get();
         
         // Tarefas para hoje do usuário
-        $tarefasParaHoje = Tarefa::where('user_id', $user->id)
+        $tarefasParaHoje = Tarefa::accessibleBy($user)
             ->paraHoje()
-            ->with('projeto')
+            ->with(['projeto', 'responsavel'])
             ->orderBy('data_vencimento')
+            ->take(10)
             ->get();
         
         // Projetos recentes do usuário
-        $projetosRecentes = Projeto::where('user_id', $user->id)
-            ->with(['tarefas' => function($query) use ($user) {
-                $query->where('user_id', $user->id);
-            }])
+        $projetosRecentes = Projeto::accessibleBy($user)
+            ->with(['tarefas'])
             ->latest()
             ->take(5)
             ->get();
         
         // Tarefas recentes do usuário
-        $tarefasRecentes = Tarefa::where('user_id', $user->id)
-            ->with('projeto')
+        $tarefasRecentes = Tarefa::accessibleBy($user)
+            ->with(['projeto', 'responsavel'])
             ->latest()
             ->take(5)
             ->get();
@@ -81,15 +82,21 @@ class DashboardController extends Controller
             ->get();
         
         // Estatísticas por projeto do usuário
-        $projetosComEstatisticas = Projeto::where('user_id', $user->id)
-            ->with(['tarefas' => function($query) use ($user) {
-                $query->where('user_id', $user->id)->select('projeto_id', 'status');
-            }])->get()->map(function($projeto) {
-                $tarefas = $projeto->tarefas;
-                $projeto->total_tarefas = $tarefas->count();
-                $projeto->tarefas_pendentes = $tarefas->where('status', 'pendente')->count();
-                $projeto->tarefas_em_desenvolvimento = $tarefas->where('status', 'em desenvolvimento')->count();
-                $projeto->tarefas_concluidas = $tarefas->where('status', 'concluida')->count();
+        $projetosComEstatisticas = Projeto::accessibleBy($user)
+            ->withCount([
+                'tarefas as total_tarefas',
+                'tarefas as tarefas_pendentes' => function($query) {
+                    $query->where('status', 'pendente');
+                },
+                'tarefas as tarefas_em_desenvolvimento' => function($query) {
+                    $query->where('status', 'em desenvolvimento');
+                },
+                'tarefas as tarefas_concluidas' => function($query) {
+                    $query->where('status', 'concluida');
+                }
+            ])
+            ->get()
+            ->map(function($projeto) {
                 $projeto->percentual_concluido = $projeto->total_tarefas > 0 
                     ? round(($projeto->tarefas_concluidas / $projeto->total_tarefas) * 100, 1)
                     : 0;
@@ -151,11 +158,46 @@ class DashboardController extends Controller
      */
     public function markAllAsRead()
     {
+        $notifications = session('notifications', []);
+        
+        foreach ($notifications as $notification) {
+            if (isset($notification['hash'])) {
+                NotificationHelper::dismiss($notification['hash']);
+            }
+        }
+
         NotificationHelper::clear();
         
         return response()->json([
             'success' => true,
             'message' => 'Todas as notificações foram marcadas como lidas'
+        ]);
+    }
+
+    /**
+     * Descarta uma notificação específica
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function dismissNotification(Request $request)
+    {
+        $hash = $request->input('hash');
+        
+        if ($hash) {
+            NotificationHelper::dismiss($hash);
+            
+            // Remover da sessão também
+            $notifications = session('notifications', []);
+            $notifications = array_filter($notifications, function($n) use ($hash) {
+                return ($n['hash'] ?? null) !== $hash;
+            });
+            session(['notifications' => $notifications]);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Notificação descartada'
         ]);
     }
 }

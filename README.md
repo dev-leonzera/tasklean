@@ -1,188 +1,118 @@
-# Tasklean - Sistema de Gestão Ágil de Projetos
+# ⚡ Tasklean
 
-Sistema completo de gestão de projetos e tarefas desenvolvido com **Laravel MVC** e **PostgreSQL**.
+**Tasklean** é um sistema de gestão ágil de projetos de alto desempenho, focado em desenvolvedores e equipes que buscam uma interface premium, minimalista e extremamente rápida.
 
-## 🚀 Tecnologias Utilizadas
+![Laravel Version](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel)
+![Tailwind Version](https://img.shields.io/badge/Tailwind-4.0-38B2AC?style=for-the-badge&logo=tailwind-css)
+![PHP Version](https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php)
+![Livewire Version](https://img.shields.io/badge/Livewire-3.x-FB70A9?style=for-the-badge&logo=livewire)
 
-- **Framework**: Laravel 12.x (MVC)
-- **Banco de Dados**: PostgreSQL
-- **ORM**: Eloquent
-- **Frontend**: Blade Templates + Bootstrap 5
-- **Validação**: Form Requests
-- **Testes**: Factories e Seeders
-- **Pagamentos**: Laravel Cashier (Stripe)
+---
 
-## 📋 Funcionalidades
+## ✨ Diferenciais & Funcionalidades
 
-### Projetos
-- ✅ Criar, editar, listar e remover projetos
-- ✅ Ativar/inativar projetos
-- ✅ Relacionamento com tarefas
+### 🎨 Interface Premium (Dev-Centric)
+- **Glassmorphism UI**: Design moderno com efeitos de transparência, desfoque e profundidade.
+- **Micro-animações**: Transições suaves e feedback visual instantâneo para uma UX fluida.
+- **Dark Mode Nativo**: Suporte completo e otimizado para temas claros e escuros.
+- **Ilustrações 3D**: Experiência visual rica com ilustrações personalizadas para estados vazios e erros.
 
-### Tarefas
-- ✅ Criar, editar, listar e remover tarefas
-- ✅ Alterar status das tarefas
-- ✅ Listar tarefas atrasadas
-- ✅ Listar tarefas em desenvolvimento
-- ✅ Relacionamento com projetos
+### 🚀 Produtividade de Elite
+- **Menu de Comando (Cmd+K)**: Navegação ultra-rápida via teclado para qualquer módulo do sistema.
+- **Kanban Dinâmico**: Gestão visual de tarefas com estados configuráveis e filtros inteligentes.
+- **Gestão de Sprints**: Planejamento e execução de ciclos ágeis integrados ao fluxo de trabalho.
+- **Atalhos de Teclado**: Atalhos globais para criação rápida de tarefas e troca de contextos.
 
-## 🗄️ Estrutura do Banco de Dados
+### 👥 Colaboração & Times
+- **Módulo de Equipes**: Criação de múltiplos times com gestão independente de projetos.
+- **RBAC (Role-Based Access Control)**: Controle de acesso granular (Admin, Editor, Viewer).
+- **Gestão de Membros**: Sistema de convites e atribuição de responsabilidades.
 
-### Tabela `projetos`
-- `id` - Chave primária
-- `titulo` - Título do projeto
-- `ativo` - Status ativo/inativo (boolean)
-- `responsavel` - Nome do responsável
-- `data_criacao` - Data de criação
-- `created_at` - Timestamp de criação
-- `updated_at` - Timestamp de atualização
+### 🔔 Notificações & Dashboards
+- **Inteligência de Prazos**: Alertas críticos para tarefas vencidas ou próximas do vencimento.
+- **Dashboard 360º**: Visão centralizada de métricas de produtividade, tarefas e compromissos.
+- **Central de Notificações**: Sistema persistente com cache para alta performance.
 
-### Tabela `tarefas`
-- `id` - Chave primária
-- `titulo` - Título da tarefa
-- `descricao` - Descrição da tarefa (opcional)
-- `status` - Status: pendente, em desenvolvimento, concluida
-- `data_criacao` - Data de criação
-- `data_vencimento` - Data de vencimento (opcional)
-- `responsavel` - Nome do responsável
-- `projeto_id` - Chave estrangeira para projetos
-- `created_at` - Timestamp de criação
-- `updated_at` - Timestamp de atualização
+---
 
-## 🛠️ Instalação e Configuração
+## 🛠️ Stack Tecnológica
 
-### 1. Configurar Banco PostgreSQL
+- **Core**: [Laravel 12.x](https://laravel.com)
+- **Frontend**: [Livewire 3](https://livewire.laravel.com) + [Flux UI](https://fluxui.dev) + [Volt](https://livewire.laravel.com/docs/volt)
+- **Styling**: [Tailwind CSS 4.0](https://tailwindcss.com) (Otimizado com Vite)
+- **Banco de Dados**: SQLite (Desenvolvimento) / PostgreSQL (Suportado)
+- **Pagamentos**: [Laravel Cashier (Stripe)](https://laravel.com/docs/billing)
+- **Asset Bundler**: [Vite 6](https://vitejs.dev)
 
-Crie um banco de dados PostgreSQL e configure o arquivo `.env`:
+---
 
-```env
-DB_CONNECTION=pgsql
-DB_HOST=127.0.0.1
-DB_PORT=5432
-DB_DATABASE=tasklean
-DB_USERNAME=postgres
-DB_PASSWORD=sua_senha
-```
+## 🚀 Instalação e Configuração
 
-### 2. Instalar Dependências
+### 1. Requisitos
+- PHP 8.2+
+- Composer
+- Node.js & NPM
 
+### 2. Setup Inicial
 ```bash
+# Clone o repositório
+git clone https://github.com/leonzera/tasklean.git
+cd tasklean
+
+# Instale as dependências
 composer install
+npm install
 ```
 
-### 3. Configurar Aplicação
-
+### 3. Configuração de Ambiente
 ```bash
+cp .env.example .env
 php artisan key:generate
 ```
 
-### 4. Configurar Laravel Cashier (Stripe)
-
-Adicione as seguintes variáveis ao seu arquivo `.env`:
-
-```env
-STRIPE_KEY=pk_test_sua_chave_publica_aqui
-STRIPE_SECRET=sk_test_sua_chave_secreta_aqui
-STRIPE_WEBHOOK_SECRET=whsec_seu_webhook_secret_aqui
-
-# Opcional: Configurações adicionais do Cashier
-CASHIER_PATH=stripe
-CASHIER_CURRENCY=brl
-CASHIER_CURRENCY_LOCALE=pt_BR
-```
-
-**Nota**: Para obter suas chaves do Stripe:
-1. Acesse [Stripe Dashboard](https://dashboard.stripe.com/)
-2. Vá em **Developers** > **API keys**
-3. Copie as chaves de teste (ou produção) e adicione ao `.env`
-
-### 5. Executar Migrations
-
+### 4. Banco de Dados
 ```bash
-php artisan migrate
+# O sistema utiliza SQLite por padrão em desenvolvimento
+touch database/database.sqlite
+php artisan migrate --seed
 ```
 
-Isso criará as tabelas necessárias para o Cashier:
-- Colunas adicionais na tabela `users` (stripe_id, pm_type, pm_last_four, trial_ends_at)
-- Tabela `subscriptions`
-- Tabela `subscription_items`
-
-### 6. Popular Banco com Dados de Teste
-
+### 5. Rodar em Desenvolvimento
+O projeto utiliza um comando unificado para rodar Servidor, Queue e Vite simultaneamente:
 ```bash
-php artisan db:seed
+composer dev
 ```
-
-### 7. Iniciar Servidor
-
-```bash
-php artisan serve
-```
-
 O sistema estará disponível em: `http://localhost:8000`
 
-## 🖥️ Interface Web
+---
 
-O sistema possui uma interface web completa e responsiva com:
+## 🧪 Testes
+O projeto possui uma suíte completa de testes automatizados:
+```bash
+composer test
+```
 
-### Páginas Principais
-- **Dashboard de Projetos** (`/projetos`) - Lista todos os projetos com estatísticas
-- **Gestão de Tarefas** (`/tarefas`) - Lista todas as tarefas com filtros
-- **Tarefas Atrasadas** (`/tarefas/atrasadas`) - Visualização de tarefas em atraso
-- **Tarefas em Desenvolvimento** (`/tarefas/em-desenvolvimento`) - Tarefas em andamento
-
-### Funcionalidades da Interface
-- ✅ **Navegação intuitiva** com sidebar responsiva
-- ✅ **Filtros em tempo real** para tarefas (status, projeto, busca)
-- ✅ **Formulários validados** com feedback visual
-- ✅ **Cards interativos** com hover effects
-- ✅ **Badges de status** coloridos
-- ✅ **Alertas de sucesso/erro** com auto-dismiss
-- ✅ **Confirmação de exclusão** via JavaScript
-- ✅ **Design responsivo** para mobile e desktop
-
-### Recursos Visuais
-- **Bootstrap 5** para componentes modernos
-- **Bootstrap Icons** para ícones consistentes
-- **Cores semânticas** (verde=sucesso, vermelho=perigo, amarelo=aviso, azul=info)
-- **Layout em cards** para melhor organização
-- **Sidebar fixa** para navegação rápida
-
-## 🧪 Testando o Sistema
-
-### Usando a Interface Web
-
-1. **Acesse**: `http://localhost:8000`
-2. **Navegue** pelos projetos e tarefas
-3. **Crie** novos projetos e tarefas
-4. **Teste** os filtros e funcionalidades
-
-## 🚀 Próximos Passos
-
-O sistema está preparado para expansões futuras como:
-
-- 🔐 Sistema de autenticação de usuários
-- 📊 Dashboards e relatórios
-- 🏷️ Sistema de prioridades para tarefas
-- 📅 Calendário de tarefas
-- 👥 Gestão de equipes
-- 📱 Interface web responsiva
-- 🔔 Notificações por email
+---
 
 ## 📝 Convenções de Commits
+Seguimos o padrão **Conventional Commits**:
+- `feat:` Nova funcionalidade
+- `fix:` Correção de bug
+- `refactor:` Melhoria de código sem alteração funcional
+- `docs:` Alterações na documentação
+- `style:` Ajustes visuais e de design (CSS/Blade)
+- `test:` Adição ou correção de testes
 
-Este projeto segue o padrão Conventional Commits:
-
-- `feat:` nova funcionalidade
-- `fix:` correção de bug
-- `refactor:` alteração de código sem mudança de comportamento
-- `test:` criação/ajuste de testes
-- `docs:` documentação
+---
 
 ## 🤝 Contribuição
+1. Faça um **Fork** do projeto
+2. Crie uma **Branch** para sua feature (`git checkout -b feature/AmazingFeature`)
+3. **Commit** suas mudanças (`git commit -m 'feat: add some AmazingFeature'`)
+4. **Push** para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um **Pull Request**
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'feat: add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
+---
+
+Desenvolvido por [leonzera](https://github.com/leonzera)
+

@@ -16,9 +16,7 @@ class ProjetoController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Projeto::where('user_id', Auth::id())->with(['tarefas' => function($query) {
-            $query->where('user_id', Auth::id());
-        }]);
+        $query = Projeto::accessibleBy(Auth::user())->with(['responsavel', 'tarefas']);
         
         // Filtro por status
         if ($request->filled('status')) {
@@ -47,7 +45,7 @@ class ProjetoController extends Controller
             $query->orderBy($ordenacao, $direcao);
         }
         
-        $projetos = $query->get();
+        $projetos = $query->paginate(10);
         
         return view('projetos.index', compact('projetos'));
     }
@@ -57,8 +55,13 @@ class ProjetoController extends Controller
      */
     public function create()
     {
-        $usuarios = \App\Models\User::all();
-        return view('projetos.create', compact('usuarios'));
+        $usuarios = \App\Models\User::orderBy('name')->take(50)->get();
+        $times = \App\Models\Time::where('owner_id', Auth::id())
+            ->orWhereHas('membros', function($q) {
+                $q->where('user_id', Auth::id());
+            })->get();
+
+        return view('projetos.create', compact('usuarios', 'times'));
     }
 
     /**
@@ -72,12 +75,14 @@ class ProjetoController extends Controller
         $request->validate([
             'titulo' => 'required|string|max:255',
             'responsavel_id' => 'required|exists:users,id',
+            'time_id' => 'nullable|exists:times,id',
             'ativo' => 'boolean'
         ]);
 
         Projeto::create([
             'titulo' => $request->titulo,
             'responsavel_id' => $request->responsavel_id,
+            'time_id' => $request->time_id,
             'ativo' => $request->ativo ?? true,
             'data_criacao' => now(),
             'user_id' => Auth::id()
@@ -94,15 +99,11 @@ class ProjetoController extends Controller
      */
     public function show(int $id)
     {
-        $projeto = Projeto::where('user_id', Auth::id())
-            ->with(['tarefas' => function($query) {
-                $query->where('user_id', Auth::id());
-            }, 'responsavel'])
-            ->find($id);
+        $projeto = Projeto::accessibleBy(Auth::user())
+            ->with(['tarefas.responsavel', 'responsavel'])
+            ->findOrFail($id);
 
-        if (!$projeto) {
-            return redirect()->route('projetos.index')->with('error', 'Projeto não encontrado!');
-        }
+        $this->authorize('view', $projeto);
 
         return view('projetos.show', compact('projeto'));
     }
@@ -115,13 +116,11 @@ class ProjetoController extends Controller
      */
     public function edit(int $id)
     {
-        $projeto = Projeto::where('user_id', Auth::id())->find($id);
+        $projeto = Projeto::accessibleBy(Auth::user())->findOrFail($id);
         
-        if (!$projeto) {
-            return redirect()->route('projetos.index')->with('error', 'Projeto não encontrado!');
-        }
+        $this->authorize('update', $projeto);
         
-        $usuarios = \App\Models\User::all();
+        $usuarios = \App\Models\User::orderBy('name')->take(50)->get();
         return view('projetos.edit', compact('projeto', 'usuarios'));
     }
 
@@ -134,11 +133,9 @@ class ProjetoController extends Controller
      */
     public function update(Request $request, int $id)
     {
-        $projeto = Projeto::where('user_id', Auth::id())->find($id);
+        $projeto = Projeto::accessibleBy(Auth::user())->findOrFail($id);
 
-        if (!$projeto) {
-            return redirect()->route('projetos.index')->with('error', 'Projeto não encontrado!');
-        }
+        $this->authorize('update', $projeto);
 
         $request->validate([
             'titulo' => 'sometimes|string|max:255',
@@ -159,11 +156,9 @@ class ProjetoController extends Controller
      */
     public function destroy(int $id)
     {
-        $projeto = Projeto::where('user_id', Auth::id())->find($id);
+        $projeto = Projeto::accessibleBy(Auth::user())->findOrFail($id);
 
-        if (!$projeto) {
-            return redirect()->route('projetos.index')->with('error', 'Projeto não encontrado!');
-        }
+        $this->authorize('delete', $projeto);
 
         $projeto->delete();
 
@@ -178,11 +173,9 @@ class ProjetoController extends Controller
      */
     public function ativar(int $id)
     {
-        $projeto = Projeto::where('user_id', Auth::id())->find($id);
+        $projeto = Projeto::accessibleBy(Auth::user())->findOrFail($id);
 
-        if (!$projeto) {
-            return redirect()->route('projetos.index')->with('error', 'Projeto não encontrado!');
-        }
+        $this->authorize('update', $projeto);
 
         $projeto->update(['ativo' => true]);
 
@@ -197,11 +190,9 @@ class ProjetoController extends Controller
      */
     public function inativar(int $id)
     {
-        $projeto = Projeto::where('user_id', Auth::id())->find($id);
+        $projeto = Projeto::accessibleBy(Auth::user())->findOrFail($id);
 
-        if (!$projeto) {
-            return redirect()->route('projetos.index')->with('error', 'Projeto não encontrado!');
-        }
+        $this->authorize('update', $projeto);
 
         $projeto->update(['ativo' => false]);
 

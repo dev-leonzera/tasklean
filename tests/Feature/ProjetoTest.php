@@ -65,8 +65,7 @@ class ProjetoTest extends TestCase
 
         $response = $this->actingAs($this->user)->get(route('projetos.show', $projeto->id));
 
-        $response->assertRedirect(route('projetos.index'));
-        $response->assertSessionHas('error');
+        $response->assertStatus(404);
     }
 
     public function test_user_can_update_their_project(): void

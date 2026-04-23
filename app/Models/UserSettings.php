@@ -36,6 +36,7 @@ class UserSettings extends Model
         'timezone',
         'require_task_assignee',
         'require_task_due_date',
+        'dismissed_notifications',
     ];
 
     protected $casts = [
@@ -53,6 +54,7 @@ class UserSettings extends Model
         'require_task_assignee' => 'boolean',
         'require_task_due_date' => 'boolean',
         'working_days' => 'array',
+        'dismissed_notifications' => 'array',
     ];
 
     /**

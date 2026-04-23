@@ -20,6 +20,7 @@ class Projeto extends Model
         'ativo',
         'responsavel_id',
         'user_id',
+        'time_id',
         'data_criacao',
     ];
 
@@ -66,6 +67,11 @@ class Projeto extends Model
         return $this->hasMany(TagProjeto::class);
     }
 
+    public function time(): BelongsTo
+    {
+        return $this->belongsTo(Time::class);
+    }
+
     /**
      * Scope para projetos ativos
      *
@@ -86,5 +92,23 @@ class Projeto extends Model
     public function scopeInativos($query)
     {
         return $query->where('ativo', false);
+    }
+
+    /**
+     * Scope para projetos acessíveis pelo usuário (dono ou membro do time)
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param User $user
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeAccessibleBy($query, User $user)
+    {
+        return $query->where('user_id', $user->id)
+            ->orWhereHas('time', function($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                  ->orWhereHas('membros', function($m) use ($user) {
+                      $m->where('user_id', $user->id);
+                  });
+            });
     }
 }

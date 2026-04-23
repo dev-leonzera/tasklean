@@ -19,16 +19,30 @@ class NotificationHelper
      */
     public static function add(string $type, string $title, string $message, array $action = null): void
     {
+        // Gerar um hash único para esta notificação para persistência
+        $hash = md5($type . $title . substr($message, 0, 50));
+        
+        $user = Auth::user();
+        if ($user) {
+            $userSettings = \App\Models\UserSettings::getForUser($user->id);
+            $dismissed = $userSettings->dismissed_notifications ?? [];
+            
+            // Se já foi descartada, não adiciona novamente
+            if (in_array($hash, $dismissed)) {
+                return;
+            }
+        }
+
         $notifications = session('notifications', []);
         
-        // Verificar se já existe uma notificação similar (evitar duplicações)
-        $exists = collect($notifications)->contains(function ($notification) use ($type, $message) {
-            return $notification['type'] === $type && 
-                   str_contains($notification['message'], substr($message, 0, 50));
+        // Verificar se já existe uma notificação similar na sessão atual (evitar duplicações)
+        $exists = collect($notifications)->contains(function ($notification) use ($hash) {
+            return ($notification['hash'] ?? null) === $hash;
         });
         
         if (!$exists) {
             $notifications[] = [
+                'hash' => $hash,
                 'type' => $type,
                 'title' => $title,
                 'message' => $message,
@@ -38,6 +52,23 @@ class NotificationHelper
             ];
             
             session(['notifications' => $notifications]);
+        }
+    }
+
+    /**
+     * Descarta uma notificação permanentemente para o usuário
+     */
+    public static function dismiss(string $hash): void
+    {
+        $user = Auth::user();
+        if (!$user) return;
+
+        $userSettings = \App\Models\UserSettings::getForUser($user->id);
+        $dismissed = $userSettings->dismissed_notifications ?? [];
+        
+        if (!in_array($hash, $dismissed)) {
+            $dismissed[] = $hash;
+            $userSettings->update(['dismissed_notifications' => $dismissed]);
         }
     }
 
@@ -108,9 +139,10 @@ class NotificationHelper
             ->get();
 
         foreach ($tarefasVenceHoje as $tarefa) {
+            $projetoTitulo = $tarefa->projeto->titulo ?? 'Sem projeto';
             self::warning(
                 'Tarefa vence hoje!',
-                "A tarefa '{$tarefa->titulo}' do projeto '{$tarefa->projeto->titulo}' vence hoje.",
+                "A tarefa '{$tarefa->titulo}' do projeto '{$projetoTitulo}' vence hoje.",
                 [
                     'url' => route('tarefas.show', $tarefa->id),
                     'text' => 'Ver Tarefa',
@@ -134,9 +166,11 @@ class NotificationHelper
                 $mensagemAtraso = "atrasada";
             }
             
+            $projetoTitulo = $tarefa->projeto->titulo ?? 'Sem projeto';
+            
             self::danger(
                 'Tarefa atrasada!',
-                "A tarefa '{$tarefa->titulo}' do projeto '{$tarefa->projeto->titulo}' está {$mensagemAtraso}.",
+                "A tarefa '{$tarefa->titulo}' do projeto '{$projetoTitulo}' está {$mensagemAtraso}.",
                 [
                     'url' => route('tarefas.show', $tarefa->id),
                     'text' => 'Ver Tarefa',
@@ -178,9 +212,11 @@ class NotificationHelper
                 $mensagemDesenvolvimento = "{$diasEmDesenvolvimento} dias";
             }
             
+            $projetoTitulo = $tarefa->projeto->titulo ?? 'Sem projeto';
+            
             self::warning(
                 'Tarefa em desenvolvimento há muito tempo',
-                "A tarefa '{$tarefa->titulo}' está em desenvolvimento há {$mensagemDesenvolvimento}.",
+                "A tarefa '{$tarefa->titulo}' do projeto '{$projetoTitulo}' está em desenvolvimento há {$mensagemDesenvolvimento}.",
                 [
                     'url' => route('tarefas.show', $tarefa->id),
                     'text' => 'Ver Tarefa',
@@ -191,12 +227,25 @@ class NotificationHelper
     }
 
     /**
-     * Executa todas as verificações de notificações
+     * Executa todas as verificações de notificações (com cache de 5 minutos)
      */
     public static function checkAll(): void
     {
+        $userId = Auth::id();
+        if (!$userId) return;
+
+        $cacheKey = 'user_notifications_checked_' . $userId;
+        
+        // Se já verificamos recentemente, não fazemos nada (as notificações já estão na sessão ou descartadas)
+        if (\Illuminate\Support\Facades\Cache::has($cacheKey)) {
+            return;
+        }
+
         self::checkTarefasPrestesAtrasar();
         self::checkProjetosSemTarefas();
         self::checkTarefasEmDesenvolvimentoAntigas();
+
+        // Marcar como verificado por 5 minutos
+        \Illuminate\Support\Facades\Cache::put($cacheKey, true, now()->addMinutes(5));
     }
 }

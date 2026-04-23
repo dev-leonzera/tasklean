@@ -5,366 +5,202 @@
 
 @section('actions')
     <div class="d-flex gap-2">
-        <a href="{{ route('tarefas.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-1"></i> Nova Tarefa
+        <a href="{{ route('tarefas.create') }}" class="btn btn-primary px-4 shadow-sm">
+            <i class="bi bi-plus-lg me-2"></i> Nova Tarefa
         </a>
-        <a href="{{ route('kanban') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-kanban me-1"></i> Kanban
+        <a href="{{ route('kanban') }}" class="btn btn-secondary px-4 shadow-sm">
+            <i class="bi bi-kanban me-2"></i> Kanban
         </a>
+        <button class="btn btn-secondary px-4 shadow-sm" onclick="toggleFilters()">
+            <i class="bi bi-funnel me-2"></i> Filtros
+        </button>
     </div>
 @endsection
 
 @section('content')
 <!-- Page Header -->
-<div class="row mb-4">
+<div class="row mb-5">
     <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3">
             <div>
-                <h1 class="h3 mb-1 fw-bold text-primary">
-                    <i class="bi bi-list-task me-2"></i>Tarefas
+                <h1 class="h2 mb-1 fw-800 text-dark">
+                    Gerencie suas Tarefas 🎯
                 </h1>
-                <p class="text-muted mb-0">Organize e acompanhe todas as suas tarefas</p>
+                <p class="text-muted mb-0">Organize o backlog, acompanhe o progresso e cumpra seus prazos.</p>
             </div>
-            <div class="d-flex align-items-center">
-                <span class="text-muted me-3">{{ $tarefas->count() }} tarefa(s)</span>
-                <button class="btn btn-outline-primary">
-                    <i class="bi bi-funnel me-1"></i> Filtros
-                </button>
+            <div class="d-flex flex-wrap gap-2">
+                <span class="badge bg-soft-primary text-primary px-3 py-2 rounded-pill fw-bold d-flex align-items-center" style="background: var(--primary-light)">
+                    {{ $tarefas->count() }} tarefas no total
+                </span>
             </div>
         </div>
     </div>
 </div>
-<style>
-    .task-card {
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
-        overflow: hidden;
-        background: white;
-        border: 1px solid var(--border-color);
-    }
-    
-    .task-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
-    
-    .task-card.pendente {
-        border-left: 4px solid #f59e0b;
-    }
-    
-    .task-card.em-desenvolvimento {
-        border-left: 4px solid #3b82f6;
-    }
-    
-    .task-card.concluida {
-        border-left: 4px solid #10b981;
-        opacity: 0.95;
-    }
-    
-    .task-card.backlog {
-        border-left: 4px solid #6b7280;
-    }
-    
-    .task-header {
-        padding: 1.5rem 1.5rem 1rem 1.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        border-bottom: 1px solid #f1f5f9;
-    }
-    
-    .task-title {
-        color: var(--primary-color);
-        font-weight: 600;
-        font-size: 1rem;
-        margin: 0;
-        line-height: 1.3;
-    }
-    
-    .task-status {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-        font-weight: 500;
-    }
-    
-    .task-body {
-        padding: 1rem 1.5rem;
-    }
-    
-    .task-info {
-        color: var(--secondary-color);
-        font-size: 0.9rem;
-        margin-bottom: 0.75rem;
-        display: flex;
-        align-items: center;
-    }
-    
-    .task-info i {
-        width: 16px;
-        margin-right: 0.75rem;
-        color: #a0aec0;
-    }
-    
-    .task-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-    
-    .task-tag {
-        background: #f7fafc;
-        color: var(--secondary-color);
-        font-size: 0.75rem;
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-        font-weight: 500;
-        border: 1px solid var(--border-color);
-    }
-    
-    .task-actions {
-        padding: 0 1.5rem 1.5rem 1.5rem;
-        display: flex;
-        gap: 0.75rem;
-    }
-    
-    .action-btn {
-        flex: 1;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        padding: 0.75rem 1rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        text-align: center;
-        text-decoration: none;
-        border: none;
-        cursor: pointer;
-    }
-    
-    .btn-primary-action {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: white;
-    }
-    
-    .btn-primary-action:hover {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: white;
-        transform: translateY(-1px);
-    }
-    
-    .btn-secondary-action {
-        background: #f7fafc;
-        color: var(--secondary-color);
-        border: 1px solid var(--border-color);
-    }
-    
-    .btn-secondary-action:hover {
-        background: #e2e8f0;
-        color: var(--primary-color);
-        transform: translateY(-1px);
-    }
-    
-    .empty-state {
-        background: #f7fafc;
-        border-radius: 12px;
-        padding: 4rem 2rem;
-        text-align: center;
-        color: var(--secondary-color);
-        border: 1px solid var(--border-color);
-    }
-    
-    .empty-state i {
-        color: #a0aec0;
-    }
-    
-    .filters-card {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        border: 1px solid var(--border-color);
-        margin-bottom: 2rem;
-    }
-</style>
 
-<div class="row">
-    <div class="col-12">
-        <!-- Filtros -->
-        <div class="filters-card">
-            <div class="card-body p-4">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label small fw-semibold text-muted">Status</label>
-                        <select class="form-select" id="statusFilter">
-                            <option value="">Todos os Status</option>
-                            <option value="pendente">Pendente</option>
-                            <option value="em desenvolvimento">Em Desenvolvimento</option>
-                            <option value="concluida">Concluída</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label small fw-semibold text-muted">Projeto</label>
-                        <select class="form-select" id="projetoFilter">
-                            <option value="">Todos os Projetos</option>
-                            @foreach($tarefas->pluck('projeto')->unique() as $projeto)
-                                <option value="{{ $projeto->id }}">{{ $projeto->titulo }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label small fw-semibold text-muted">Buscar</label>
-                        <input type="text" class="form-control" id="searchInput" placeholder="Título ou responsável...">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label small fw-semibold text-muted">&nbsp;</label>
-                        <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
-                            <i class="bi bi-x-circle me-1"></i> Limpar
-                        </button>
-                    </div>
+<!-- Filtros -->
+<div class="chart-container mb-5 {{ request()->anyFilled(['status', 'projeto_id', 'busca']) ? '' : 'd-none' }}" id="filtersCard">
+    <form method="GET" action="{{ route('tarefas.index') }}" id="filtersForm">
+        <div class="d-flex align-items-center mb-4">
+            <h5 class="section-title mb-0">
+                <i class="bi bi-funnel"></i> Refinar Busca
+            </h5>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="status" onchange="this.form.submit()">
+                    <option value="">Todos os Status</option>
+                    <option value="backlog" {{ request('status') == 'backlog' ? 'selected' : '' }}>Backlog</option>
+                    <option value="pendente" {{ request('status') == 'pendente' ? 'selected' : '' }}>Pendente</option>
+                    <option value="em desenvolvimento" {{ request('status') == 'em desenvolvimento' ? 'selected' : '' }}>Em Desenvolvimento</option>
+                    <option value="concluida" {{ request('status') == 'concluida' ? 'selected' : '' }}>Concluída</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Projeto</label>
+                <select class="form-select" name="projeto_id" onchange="this.form.submit()">
+                    <option value="">Todos os Projetos</option>
+                    @foreach($projetos as $projeto)
+                        <option value="{{ $projeto->id }}" {{ request('projeto_id') == $projeto->id ? 'selected' : '' }}>{{ $projeto->titulo }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Buscar por título ou responsável</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" class="form-control border-start-0 ps-0" name="busca" value="{{ request('busca') }}" placeholder="Digite e aperte Enter...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        Filtrar
+                    </button>
+                    <a href="{{ route('tarefas.index') }}" class="btn btn-secondary" title="Limpar Filtros">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
                 </div>
             </div>
         </div>
+    </form>
+</div>
 
-        <!-- Lista de Tarefas -->
-        @if($tarefas->count() > 0)
-            <div class="row" id="tarefasContainer">
-                @foreach($tarefas as $tarefa)
-                    <div class="col-md-6 col-lg-4 mb-4 tarefa-card" 
-                         data-status="{{ $tarefa->status }}" 
-                         data-projeto="{{ $tarefa->projeto_id }}"
-                         data-search="{{ strtolower($tarefa->titulo . ' ' . $tarefa->responsavel) }}">
-                        <div class="card task-card {{ str_replace(' ', '-', $tarefa->status) }} h-100">
-                            <div class="task-header">
-                                <h6 class="task-title">{{ Str::limit($tarefa->titulo, 30) }}</h6>
-                                @php
-                                    $statusClasses = [
-                                        'backlog' => 'bg-secondary',
-                                        'pendente' => 'bg-warning',
-                                        'em desenvolvimento' => 'bg-info',
-                                        'concluida' => 'bg-success'
-                                    ];
-                                    $statusLabels = [
-                                        'backlog' => 'Backlog',
-                                        'pendente' => 'Pendente',
-                                        'em desenvolvimento' => 'Em Dev',
-                                        'concluida' => 'Concluída'
-                                    ];
-                                @endphp
-                                <span class="badge {{ $statusClasses[$tarefa->status] }} task-status">
-                                    {{ $statusLabels[$tarefa->status] }}
-                                </span>
+@if($tarefas->count() > 0)
+    <div class="row" id="tarefasContainer">
+        @foreach($tarefas as $tarefa)
+            <div class="col-xl-4 col-lg-6 mb-4 tarefa-card-item">
+                
+                <div class="chart-container p-0 overflow-hidden h-100 d-flex flex-column border-0 shadow-sm card-premium">
+                    @php
+                        $statusColor = match($tarefa->status) {
+                            'backlog' => 'secondary',
+                            'pendente' => 'warning',
+                            'em desenvolvimento' => 'info',
+                            'concluida' => 'success',
+                            default => 'primary'
+                        };
+                    @endphp
+                    
+                    <div class="p-4 border-bottom bg-light bg-opacity-50">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <span class="badge-premium {{ $statusColor }}">
+                                {{ ucfirst($tarefa->status) }}
+                            </span>
+                            <div class="dropdown">
+                                <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-4">
+                                    <li><a class="dropdown-item" href="{{ route('tarefas.show', $tarefa->id) }}"><i class="bi bi-eye me-2"></i> Ver Detalhes</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('tarefas.edit', $tarefa->id) }}"><i class="bi bi-pencil me-2"></i> Editar</a></li>
+                                </ul>
                             </div>
-                            
-                            <div class="task-body">
-                                <div class="task-info">
-                                    <i class="bi bi-folder"></i>
-                                    <span>
-                                        <a href="{{ route('projetos.show', $tarefa->projeto_id) }}" class="text-decoration-none">
-                                            {{ $tarefa->projeto->titulo }}
-                                        </a>
-                                    </span>
-                                </div>
-                                
-                                <div class="task-info">
+                        </div>
+                        <h5 class="fw-800 text-dark mb-1">
+                            <a href="{{ route('tarefas.show', $tarefa->id) }}" class="text-decoration-none text-dark hover-primary">
+                                {{ Str::limit($tarefa->titulo, 45) }}
+                            </a>
+                        </h5>
+                        <div class="task-meta">
+                            <span class="task-meta-item">
+                                <i class="bi bi-folder"></i> {{ $tarefa->projeto->titulo }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 flex-grow-1">
+                        <div class="activity-list">
+                            <div class="activity-item bg-white border-0 shadow-none mb-2 p-2">
+                                <div class="task-card-icon primary bg-opacity-10" style="width: 32px; height: 32px; font-size: 0.8rem;">
                                     <i class="bi bi-person"></i>
-                                    <span>{{ $tarefa->responsavel }}</span>
                                 </div>
-                                
-                                <div class="task-tags">
-                                    <span class="task-tag">{{ $tarefa->data_criacao->format('d/m/Y') }}</span>
-                                    
-                                    @if($tarefa->data_vencimento)
-                                        @if($tarefa->isAtrasada())
-                                            <span class="task-tag" style="background: #fef2f2; color: #dc2626; border-color: #fecaca;">
-                                                Vencida
-                                            </span>
-                                        @else
-                                            <span class="task-tag">
-                                                Vence {{ $tarefa->data_vencimento->format('d/m/Y') }}
-                                            </span>
-                                        @endif
-                                    @endif
-                                    
-                                    @if($tarefa->prioridade)
-                                        <span class="task-tag">
-                                            {{ ucfirst($tarefa->prioridade) }}
-                                        </span>
-                                    @endif
+                                <div class="flex-grow-1 small fw-semibold text-muted">
+                                    {{ $tarefa->responsavel->name ?? 'Sem responsável' }}
                                 </div>
                             </div>
                             
-                            <div class="task-actions">
-                                <a href="{{ route('tarefas.show', $tarefa->id) }}" class="action-btn btn-primary-action">
-                                    Ver Tarefa
-                                </a>
-                                <a href="{{ route('tarefas.edit', $tarefa->id) }}" class="action-btn btn-secondary-action">
-                                    Editar
-                                </a>
+                            <div class="activity-item bg-white border-0 shadow-none mb-0 p-2">
+                                <div class="task-card-icon {{ $tarefa->isAtrasada() ? 'danger' : 'info' }} bg-opacity-10" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                    <i class="bi bi-calendar3"></i>
+                                </div>
+                                <div class="flex-grow-1 small fw-semibold {{ $tarefa->isAtrasada() ? 'text-danger' : 'text-muted' }}">
+                                    @if($tarefa->data_vencimento)
+                                        Prazo: {{ $tarefa->data_vencimento->format('d/m/Y') }}
+                                        @if($tarefa->isAtrasada())
+                                            <span class="ms-1 fw-bold">(Atrasada)</span>
+                                        @endif
+                                    @else
+                                        Sem prazo definido
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </div>
-                @endforeach
+                    
+                    <div class="p-4 border-top">
+                        <div class="d-flex align-items-center justify-content-between">
+                            @php
+                                $prioridadeColor = match($tarefa->prioridade) {
+                                    'baixa' => 'success',
+                                    'media' => 'warning',
+                                    'alta' => 'danger',
+                                    'urgente' => 'danger',
+                                    default => 'secondary'
+                                };
+                            @endphp
+                            <span class="badge rounded-pill px-3 py-1.5 fw-bold bg-soft-{{ $prioridadeColor }} text-{{ $prioridadeColor }}" style="font-size: 0.7rem; background-color: var(--{{ $prioridadeColor }}-light)">
+                                <i class="bi bi-flag-fill me-1"></i> {{ ucfirst($tarefa->prioridade ?? 'Normal') }}
+                            </span>
+                            <a href="{{ route('tarefas.show', $tarefa->id) }}" class="btn btn-sm btn-light rounded-pill px-3 fw-bold text-primary">
+                                Detalhes <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
-        @else
-            <div class="empty-state">
-                <i class="bi bi-list-task display-1 text-muted"></i>
-                <h3 class="mt-3 text-muted">Nenhuma tarefa encontrada</h3>
-                <p class="text-muted">Comece criando sua primeira tarefa!</p>
-                <a href="{{ route('tarefas.create') }}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Criar Primeira Tarefa
-                </a>
-            </div>
-        @endif
+        @endforeach
     </div>
-</div>
+@else
+    <div class="chart-container text-center py-5">
+        <div class="mb-4">
+            <i class="bi bi-list-task text-muted opacity-25" style="font-size: 5rem;"></i>
+        </div>
+        <h3 class="fw-800 text-dark">Nenhuma tarefa encontrada</h3>
+        <p class="text-muted mb-4">Seu backlog está vazio. Que tal criar uma nova tarefa para começar?</p>
+        <a href="{{ route('tarefas.create') }}" class="btn btn-primary px-5 py-3 rounded-pill fw-bold shadow-sm">
+            <i class="bi bi-plus-lg me-2"></i> Criar Primeira Tarefa
+        </a>
+    </div>
+@endif
 @endsection
 
 @section('scripts')
 <script>
-    // Filtros em tempo real
-    document.addEventListener('DOMContentLoaded', function() {
-        const statusFilter = document.getElementById('statusFilter');
-        const projetoFilter = document.getElementById('projetoFilter');
-        const searchInput = document.getElementById('searchInput');
-        
-        function filterTarefas() {
-            const statusValue = statusFilter.value;
-            const projetoValue = projetoFilter.value;
-            const searchValue = searchInput.value.toLowerCase();
-            
-            const cards = document.querySelectorAll('.tarefa-card');
-            
-            cards.forEach(card => {
-                const status = card.dataset.status;
-                const projeto = card.dataset.projeto;
-                const search = card.dataset.search;
-                
-                let show = true;
-                
-                if (statusValue && status !== statusValue) show = false;
-                if (projetoValue && projeto !== projetoValue) show = false;
-                if (searchValue && !search.includes(searchValue)) show = false;
-                
-                card.style.display = show ? 'block' : 'none';
-            });
-        }
-        
-        statusFilter.addEventListener('change', filterTarefas);
-        projetoFilter.addEventListener('change', filterTarefas);
-        searchInput.addEventListener('input', filterTarefas);
-    });
-    
-    function clearFilters() {
-        document.getElementById('statusFilter').value = '';
-        document.getElementById('projetoFilter').value = '';
-        document.getElementById('searchInput').value = '';
-        
-        // Mostrar todas as tarefas
-        document.querySelectorAll('.tarefa-card').forEach(card => {
-            card.style.display = 'block';
-        });
+    function toggleFilters() {
+        const filtersCard = document.getElementById('filtersCard');
+        filtersCard.classList.toggle('d-none');
     }
 </script>
 @endsection
