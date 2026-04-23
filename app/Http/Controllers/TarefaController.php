@@ -20,7 +20,8 @@ class TarefaController extends Controller
     {
         $tarefas = Tarefa::where('user_id', Auth::id())
             ->with(['projeto', 'responsavel'])
-            ->get();
+            ->latest()
+            ->paginate(15);
         
         return view('tarefas.index', compact('tarefas'));
     }
@@ -31,7 +32,7 @@ class TarefaController extends Controller
     public function create()
     {
         $projetos = Projeto::where('user_id', Auth::id())->ativos()->get();
-        $usuarios = \App\Models\User::all();
+        $usuarios = \App\Models\User::orderBy('name')->take(50)->get();
         $projetoId = request('projeto_id');
         
         return view('tarefas.create', compact('projetos', 'usuarios', 'projetoId'));
@@ -120,7 +121,7 @@ class TarefaController extends Controller
         }
         
         $projetos = Projeto::where('user_id', Auth::id())->ativos()->get();
-        $usuarios = \App\Models\User::all();
+        $usuarios = \App\Models\User::orderBy('name')->take(50)->get();
         
         return view('tarefas.edit', compact('tarefa', 'projetos', 'usuarios'));
     }

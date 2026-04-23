@@ -11,44 +11,20 @@ use Illuminate\Support\Facades\Auth;
 class KanbanBoard extends Component
 {
     public $projetoId = null;
-    public $projetos = [];
-    public $tarefasBacklog = [];
-    public $tarefasPendentes = [];
-    public $tarefasEmDesenvolvimento = [];
-    public $tarefasConcluidas = [];
 
     public function mount()
     {
-        $this->projetos = Projeto::where('user_id', Auth::id())->ativos()->get();
-        $this->carregarTarefas();
-    }
-
-    public function carregarTarefas()
-    {
-        $query = Tarefa::where('user_id', Auth::id())->with(['projeto', 'responsavel']);
-        
-        if ($this->projetoId) {
-            $query->where('projeto_id', $this->projetoId);
-        }
-        
-        $tarefas = $query->get();
-        
-        $this->tarefasBacklog = $tarefas->where('status', 'backlog')->values()->toArray();
-        $this->tarefasPendentes = $tarefas->where('status', 'pendente')->values()->toArray();
-        $this->tarefasEmDesenvolvimento = $tarefas->where('status', 'em desenvolvimento')->values()->toArray();
-        $this->tarefasConcluidas = $tarefas->where('status', 'concluida')->values()->toArray();
+        $this->projetoId = request('projeto_id');
     }
 
     public function filtrarPorProjeto($projetoId)
     {
         $this->projetoId = $projetoId;
-        $this->carregarTarefas();
     }
 
     public function limparFiltro()
     {
         $this->projetoId = null;
-        $this->carregarTarefas();
     }
 
     #[On('tarefa-movida')]
@@ -58,7 +34,6 @@ class KanbanBoard extends Component
         
         if ($tarefa) {
             $tarefa->update(['status' => $novoStatus]);
-            $this->carregarTarefas();
             
             // Emitir evento para notificar sobre a mudança
             $this->dispatch('tarefa-atualizada', [
@@ -71,6 +46,22 @@ class KanbanBoard extends Component
 
     public function render()
     {
-        return view('livewire.kanban-board');
+        $projetos = Projeto::where('user_id', Auth::id())->ativos()->get();
+        
+        $query = Tarefa::where('user_id', Auth::id())->with(['projeto', 'responsavel']);
+        
+        if ($this->projetoId) {
+            $query->where('projeto_id', $this->projetoId);
+        }
+        
+        $tarefas = $query->get();
+
+        return view('livewire.kanban-board', [
+            'projetos' => $projetos,
+            'tarefasBacklog' => $tarefas->where('status', 'backlog'),
+            'tarefasPendentes' => $tarefas->where('status', 'pendente'),
+            'tarefasEmDesenvolvimento' => $tarefas->where('status', 'em desenvolvimento'),
+            'tarefasConcluidas' => $tarefas->where('status', 'concluida'),
+        ]);
     }
 }

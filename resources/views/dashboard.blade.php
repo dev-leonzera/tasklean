@@ -120,7 +120,7 @@
                                         </div>
                                         <div class="task-meta">
                                             <span class="task-meta-item">
-                                                <i class="bi bi-folder2"></i> {{ $tarefa->projeto->titulo }}
+                                                <i class="bi bi-folder2"></i> {{ $tarefa->projeto->titulo ?? 'Sem projeto' }}
                                             </span>
                                         </div>
                                     </div>
@@ -183,7 +183,7 @@
                                         </div>
                                         <div class="task-meta">
                                             <span class="task-meta-item">
-                                                <i class="bi bi-folder2"></i> {{ $tarefa->projeto->titulo }}
+                                                <i class="bi bi-folder2"></i> {{ $tarefa->projeto->titulo ?? 'Sem projeto' }}
                                             </span>
                                         </div>
                                     </div>
@@ -194,7 +194,7 @@
                                 <div class="d-flex align-items-center mt-3">
                                     <span class="badge-premium danger me-2">Atrasada</span>
                                     <span class="text-danger small fw-semibold">
-                                        <i class="bi bi-clock-history me-1"></i>Há {{ $tarefa->data_vencimento->diffForHumans(null, true) }}
+                                        <i class="bi bi-clock-history me-1"></i>Há {{ $tarefa->data_vencimento ? $tarefa->data_vencimento->diffForHumans(null, true) : '?' }}
                                     </span>
                                 </div>
                             </div>
@@ -351,8 +351,8 @@
                                 <div class="progress-fill" style="width: {{ $projeto->percentual_concluido }}%"></div>
                             </div>
                             <div class="mt-3 small text-muted d-flex justify-content-between">
-                                <span>{{ $projeto->tarefas_concluidas_count ?? 0 }} concluídas</span>
-                                <span>{{ $projeto->tarefas_count ?? 0 }} total</span>
+                                <span>{{ $projeto->tarefas_concluidas ?? 0 }} concluídas</span>
+                                <span>{{ $projeto->total_tarefas ?? 0 }} total</span>
                             </div>
                         </div>
                     </div>

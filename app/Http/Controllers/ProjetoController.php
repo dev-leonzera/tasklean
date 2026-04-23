@@ -47,7 +47,7 @@ class ProjetoController extends Controller
             $query->orderBy($ordenacao, $direcao);
         }
         
-        $projetos = $query->get();
+        $projetos = $query->paginate(10);
         
         return view('projetos.index', compact('projetos'));
     }
@@ -57,7 +57,7 @@ class ProjetoController extends Controller
      */
     public function create()
     {
-        $usuarios = \App\Models\User::all();
+        $usuarios = \App\Models\User::orderBy('name')->take(50)->get();
         return view('projetos.create', compact('usuarios'));
     }
 
@@ -121,7 +121,7 @@ class ProjetoController extends Controller
             return redirect()->route('projetos.index')->with('error', 'Projeto não encontrado!');
         }
         
-        $usuarios = \App\Models\User::all();
+        $usuarios = \App\Models\User::orderBy('name')->take(50)->get();
         return view('projetos.edit', compact('projeto', 'usuarios'));
     }
 

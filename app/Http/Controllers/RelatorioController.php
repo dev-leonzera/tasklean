@@ -21,7 +21,7 @@ class RelatorioController extends Controller
         
         // Buscar projetos e compromissos para filtros
         $projetos = Projeto::where('user_id', $user->id)->orderBy('titulo')->get();
-        $usuarios = \App\Models\User::all();
+        $usuarios = \App\Models\User::orderBy('name')->take(100)->get();
         
         return view('relatorios.index', compact('projetos', 'usuarios'));
     }
@@ -59,13 +59,13 @@ class RelatorioController extends Controller
             $query->where('responsavel_id', $request->responsavel_id);
         }
         
-        $projetos = $query->get()->map(function($projeto) use ($user) {
-            $tarefas = $projeto->tarefas->where('user_id', $user->id);
-            $projeto->total_tarefas = $tarefas->count();
-            $projeto->tarefas_pendentes = $tarefas->where('status', 'pendente')->count();
-            $projeto->tarefas_em_desenvolvimento = $tarefas->where('status', 'em desenvolvimento')->count();
-            $projeto->tarefas_concluidas = $tarefas->where('status', 'concluida')->count();
-            $projeto->tarefas_backlog = $tarefas->where('status', 'backlog')->count();
+        $projetos = $query->withCount([
+            'tarefas as total_tarefas' => function($q) use ($user) { $q->where('user_id', $user->id); },
+            'tarefas as tarefas_pendentes' => function($q) use ($user) { $q->where('user_id', $user->id)->where('status', 'pendente'); },
+            'tarefas as tarefas_em_desenvolvimento' => function($q) use ($user) { $q->where('user_id', $user->id)->where('status', 'em desenvolvimento'); },
+            'tarefas as tarefas_concluidas' => function($q) use ($user) { $q->where('user_id', $user->id)->where('status', 'concluida'); },
+            'tarefas as tarefas_backlog' => function($q) use ($user) { $q->where('user_id', $user->id)->where('status', 'backlog'); }
+        ])->get()->map(function($projeto) {
             $projeto->percentual_concluido = $projeto->total_tarefas > 0 
                 ? round(($projeto->tarefas_concluidas / $projeto->total_tarefas) * 100, 1)
                 : 0;

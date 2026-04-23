@@ -38,6 +38,8 @@ class DashboardController extends Controller
         $tarefasAtrasadas = Tarefa::where('user_id', $user->id)
             ->atrasadas()
             ->with(['projeto', 'responsavel'])
+            ->latest()
+            ->take(10)
             ->get();
         
         // Tarefas para hoje do usuário
@@ -45,6 +47,7 @@ class DashboardController extends Controller
             ->paraHoje()
             ->with(['projeto', 'responsavel'])
             ->orderBy('data_vencimento')
+            ->take(10)
             ->get();
         
         // Projetos recentes do usuário
@@ -82,14 +85,20 @@ class DashboardController extends Controller
         
         // Estatísticas por projeto do usuário
         $projetosComEstatisticas = Projeto::where('user_id', $user->id)
-            ->with(['tarefas' => function($query) use ($user) {
-                $query->where('user_id', $user->id)->select('projeto_id', 'status');
-            }])->get()->map(function($projeto) {
-                $tarefas = $projeto->tarefas;
-                $projeto->total_tarefas = $tarefas->count();
-                $projeto->tarefas_pendentes = $tarefas->where('status', 'pendente')->count();
-                $projeto->tarefas_em_desenvolvimento = $tarefas->where('status', 'em desenvolvimento')->count();
-                $projeto->tarefas_concluidas = $tarefas->where('status', 'concluida')->count();
+            ->withCount([
+                'tarefas as total_tarefas',
+                'tarefas as tarefas_pendentes' => function($query) use ($user) {
+                    $query->where('user_id', $user->id)->where('status', 'pendente');
+                },
+                'tarefas as tarefas_em_desenvolvimento' => function($query) use ($user) {
+                    $query->where('user_id', $user->id)->where('status', 'em desenvolvimento');
+                },
+                'tarefas as tarefas_concluidas' => function($query) use ($user) {
+                    $query->where('user_id', $user->id)->where('status', 'concluida');
+                }
+            ])
+            ->get()
+            ->map(function($projeto) {
                 $projeto->percentual_concluido = $projeto->total_tarefas > 0 
                     ? round(($projeto->tarefas_concluidas / $projeto->total_tarefas) * 100, 1)
                     : 0;

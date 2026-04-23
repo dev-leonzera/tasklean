@@ -127,6 +127,9 @@ class Compromisso extends Model
      */
     public function getDataHoraInicioAttribute()
     {
+        if (!$this->data_inicio || !$this->hora_inicio) {
+            return null;
+        }
         return $this->data_inicio->format('d/m/Y') . ' ' . $this->hora_inicio->format('H:i');
     }
 
@@ -138,6 +141,10 @@ class Compromisso extends Model
         $dataFim = $this->data_fim ?? $this->data_inicio;
         $horaFim = $this->hora_fim ?? $this->hora_inicio;
         
+        if (!$dataFim || !$horaFim) {
+            return null;
+        }
+        
         return $dataFim->format('d/m/Y') . ' ' . $horaFim->format('H:i');
     }
 
@@ -146,9 +153,18 @@ class Compromisso extends Model
      */
     public function getDuracaoAttribute()
     {
+        if (!$this->data_inicio || !$this->hora_inicio) {
+            return null;
+        }
+        
         $inicio = $this->data_inicio->setTimeFromTimeString($this->hora_inicio->format('H:i:s'));
         $dataFim = $this->data_fim ?? $this->data_inicio;
         $horaFim = $this->hora_fim ?? $this->hora_inicio;
+        
+        if (!$dataFim || !$horaFim) {
+            return null;
+        }
+        
         $fim = $dataFim->setTimeFromTimeString($horaFim->format('H:i:s'));
         
         return $inicio->diffForHumans($fim, true);

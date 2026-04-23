@@ -139,9 +139,10 @@ class NotificationHelper
             ->get();
 
         foreach ($tarefasVenceHoje as $tarefa) {
+            $projetoTitulo = $tarefa->projeto->titulo ?? 'Sem projeto';
             self::warning(
                 'Tarefa vence hoje!',
-                "A tarefa '{$tarefa->titulo}' do projeto '{$tarefa->projeto->titulo}' vence hoje.",
+                "A tarefa '{$tarefa->titulo}' do projeto '{$projetoTitulo}' vence hoje.",
                 [
                     'url' => route('tarefas.show', $tarefa->id),
                     'text' => 'Ver Tarefa',
@@ -165,9 +166,11 @@ class NotificationHelper
                 $mensagemAtraso = "atrasada";
             }
             
+            $projetoTitulo = $tarefa->projeto->titulo ?? 'Sem projeto';
+            
             self::danger(
                 'Tarefa atrasada!',
-                "A tarefa '{$tarefa->titulo}' do projeto '{$tarefa->projeto->titulo}' está {$mensagemAtraso}.",
+                "A tarefa '{$tarefa->titulo}' do projeto '{$projetoTitulo}' está {$mensagemAtraso}.",
                 [
                     'url' => route('tarefas.show', $tarefa->id),
                     'text' => 'Ver Tarefa',
@@ -209,9 +212,11 @@ class NotificationHelper
                 $mensagemDesenvolvimento = "{$diasEmDesenvolvimento} dias";
             }
             
+            $projetoTitulo = $tarefa->projeto->titulo ?? 'Sem projeto';
+            
             self::warning(
                 'Tarefa em desenvolvimento há muito tempo',
-                "A tarefa '{$tarefa->titulo}' está em desenvolvimento há {$mensagemDesenvolvimento}.",
+                "A tarefa '{$tarefa->titulo}' do projeto '{$projetoTitulo}' está em desenvolvimento há {$mensagemDesenvolvimento}.",
                 [
                     'url' => route('tarefas.show', $tarefa->id),
                     'text' => 'Ver Tarefa',
