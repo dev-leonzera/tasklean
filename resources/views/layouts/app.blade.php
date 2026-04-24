@@ -82,6 +82,12 @@
         [data-bs-theme="dark"] .bg-white:not(.metric-card .bg-white) { background-color: var(--white) !important; }
         [data-bs-theme="dark"] .bg-light { background-color: var(--light-bg) !important; }
         [data-bs-theme="dark"] .text-dark { color: var(--dark-text) !important; }
+        
+        /* Forçar cor branca real para utilitários dentro de metric-cards no Dark Mode */
+        [data-bs-theme="dark"] .metric-card .text-white { color: #ffffff !important; }
+        [data-bs-theme="dark"] .metric-card .text-white.text-opacity-75 { color: rgba(255, 255, 255, 0.75) !important; }
+        [data-bs-theme="dark"] .metric-card .bg-white { background-color: rgba(255, 255, 255, 0.25) !important; }
+        [data-bs-theme="dark"] .metric-card .bg-white.bg-opacity-25 { background-color: rgba(255, 255, 255, 0.25) !important; }
         [data-bs-theme="dark"] .text-muted { color: #94a3b8 !important; }
         [data-bs-theme="dark"] .text-primary { color: #34d399 !important; }
         [data-bs-theme="dark"] .text-info { color: #38bdf8 !important; }
