@@ -23,7 +23,7 @@ class DashboardRoleTest extends TestCase
         
         // Projeto que o owner não criou, mas está no time dele
         $otherUser = User::factory()->create();
-        $projeto = Projeto::factory()->create([
+        $projeto = Projeto::factory()->ativo()->create([
             'time_id' => $time->id,
             'user_id' => $otherUser->id,
             'titulo' => 'Projeto do Time'
@@ -53,14 +53,15 @@ class DashboardRoleTest extends TestCase
         ]);
         
         // Projeto que o admin gerencia
-        $projetoGerenciado = Projeto::factory()->create([
+        $projetoGerenciado = Projeto::factory()->ativo()->create([
             'time_id' => $time->id,
             'responsavel_id' => $admin->id,
+            'user_id' => User::factory()->create()->id, // Criado por outro, gerenciado por admin
             'titulo' => 'Meu Projeto Gerenciado'
         ]);
         
         // Projeto do time que o admin NÃO gerencia
-        $projetoOutro = Projeto::factory()->create([
+        $projetoOutro = Projeto::factory()->ativo()->create([
             'time_id' => $time->id,
             'titulo' => 'Outro Projeto do Time'
         ]);
@@ -88,7 +89,7 @@ class DashboardRoleTest extends TestCase
         ]);
         
         // Projeto que o membro participa
-        $projetoParticipa = Projeto::factory()->create([
+        $projetoParticipa = Projeto::factory()->ativo()->create([
             'time_id' => $time->id,
             'titulo' => 'Projeto que Participo'
         ]);
@@ -99,7 +100,7 @@ class DashboardRoleTest extends TestCase
         ]);
         
         // Projeto do time que o membro NÃO participa
-        $projetoOutro = Projeto::factory()->create([
+        $projetoOutro = Projeto::factory()->ativo()->create([
             'time_id' => $time->id,
             'titulo' => 'Projeto Alheio'
         ]);
