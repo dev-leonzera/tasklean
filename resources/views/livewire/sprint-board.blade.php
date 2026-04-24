@@ -82,7 +82,8 @@
             </div>
             <div class="activity-list p-4">
                 @forelse($sprintTasks as $tarefa)
-                    <div class="activity-item bg-white border rounded-4 p-3 mb-3 shadow-sm transition-all hover-translate-y">
+                    <div class="activity-item bg-white border rounded-4 p-3 mb-3 shadow-sm transition-all hover-translate-y cursor-pointer"
+                         wire:click="$dispatch('openTaskQuickView', { id: {{ $tarefa->id }} })">
                         <div class="row align-items-center">
                             <div class="col-md-7">
                                 <div class="d-flex align-items-center">
@@ -105,11 +106,11 @@
                             <div class="col-md-2 text-end">
                                 <div class="btn-group">
                                     @if($tarefa->status != 'concluida')
-                                        <button wire:click="markAsCompleted({{ $tarefa->id }})" class="btn btn-sm btn-soft-success rounded-circle me-2" style="width: 32px; height: 32px; padding: 0;">
+                                        <button wire:click.stop="markAsCompleted({{ $tarefa->id }})" class="btn btn-sm btn-soft-success rounded-circle me-2" style="width: 32px; height: 32px; padding: 0;">
                                             <i class="bi bi-check2"></i>
                                         </button>
                                     @endif
-                                    <button wire:click="removeTaskFromSprint({{ $tarefa->id }})" class="btn btn-sm btn-soft-danger rounded-circle" style="width: 32px; height: 32px; padding: 0;">
+                                    <button wire:click.stop="removeTaskFromSprint({{ $tarefa->id }})" class="btn btn-sm btn-soft-danger rounded-circle" style="width: 32px; height: 32px; padding: 0;">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
@@ -139,7 +140,8 @@
         </div>
         <div class="activity-list p-4">
             @forelse($availableTasks as $tarefa)
-                <div class="activity-item bg-light bg-opacity-50 border-0 p-3 mb-3 rounded-4">
+                <div class="activity-item bg-light bg-opacity-50 border-0 p-3 mb-3 rounded-4 cursor-pointer"
+                     wire:click="$dispatch('openTaskQuickView', { id: {{ $tarefa->id }} })">
                     <div class="row align-items-center">
                         <div class="col-md-9">
                             <h6 class="fw-bold text-dark mb-1">{{ $tarefa->titulo }}</h6>

@@ -125,6 +125,10 @@
             border-color: var(--primary-color);
         }
         
+        .cursor-pointer {
+            cursor: pointer !important;
+        }
+        
         .kanban-item-card.dragging {
             opacity: 0.5;
             transform: scale(0.95);

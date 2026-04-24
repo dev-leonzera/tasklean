@@ -23,4 +23,5 @@
 </div>
 
 @livewire('sprint-board')
+@livewire('task-quick-view')
 @endsection

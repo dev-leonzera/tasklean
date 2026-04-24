@@ -12,16 +12,17 @@
     </div>
     <div class="kanban-col-body" data-status="{{ $status }}">
         @forelse($tarefas as $tarefa)
-            <div class="kanban-item-card" 
+            <div class="kanban-item-card cursor-pointer" 
                  data-tarefa-id="{{ $tarefa['id'] }}" 
                  data-status="{{ $status }}"
+                 wire:click="$dispatch('openTaskQuickView', { id: {{ $tarefa['id'] }} })"
                  draggable="true">
                 
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <span class="badge bg-soft-{{ $color }} text-{{ $color }} rounded-pill px-2 py-0.5 fw-bold" style="font-size: 0.6rem; background-color: var(--{{ $color === 'secondary' ? 'secondary' : $color }}-light)">
                         {{ $tarefa['projeto']['titulo'] ?? 'Geral' }}
                     </span>
-                    <div class="dropdown">
+                    <div class="dropdown" x-on:click.stop>
                         <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown" style="line-height: 1;">
                             <i class="bi bi-three-dots" style="font-size: 0.8rem;"></i>
                         </button>

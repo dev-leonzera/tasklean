@@ -455,6 +455,10 @@
             border-color: var(--medium-text);
             transform: translateY(-2px);
         }
+
+        .cursor-pointer {
+            cursor: pointer !important;
+        }
     </style>
 </head>
 <body>

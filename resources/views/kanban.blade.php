@@ -36,6 +36,7 @@
 
 <div class="container-fluid">
     @livewire('kanban-board')
+    @livewire('task-quick-view')
 </div>
 @endsection
 

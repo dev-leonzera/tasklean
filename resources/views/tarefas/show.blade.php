@@ -136,6 +136,9 @@
                 </div>
             </div>
         </div>
+
+        <!-- Comentários -->
+        <livewire:comentarios-tarefa :tarefa-id="$tarefa->id" />
     </div>
 
     <div class="col-lg-4">
