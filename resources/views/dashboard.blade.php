@@ -21,7 +21,7 @@
                     <h1 class="h2 mb-0 fw-800 text-dark">
                         Olá, {{ explode(' ', auth()->user()->name ?? 'Usuário')[0] }}! 👋
                     </h1>
-                    <span class="badge bg-soft-{{ $roleDisplay['color'] }} text-{{ $roleDisplay['color'] }} ms-3 px-3 py-2 rounded-pill fw-bold border border-{{ $roleDisplay['color'] }} border-opacity-25" style="font-size: 0.7rem; letter-spacing: 0.05em;">
+                    <span class="badge bg-soft-{{ $roleDisplay['color'] }} text-{{ $roleDisplay['color'] }} ms-3 px-3 py-2 rounded-pill fw-bold border border-{{ $roleDisplay['color'] }} border-opacity-25" style="font-size: 0.85rem; letter-spacing: 0.05em;">
                         {{ \Illuminate\Support\Str::upper($roleDisplay['label']) }}
                     </span>
                 </div>
@@ -174,7 +174,7 @@
                                 <div class="user-avatar me-3" style="width: 32px; height: 32px; flex-shrink: 0;">{{ substr($tarefa->responsavel->name ?? '?', 0, 1) }}</div>
                                 <div class="flex-grow-1 overflow-hidden">
                                     <div class="fw-bold text-dark small text-truncate">{{ $tarefa->responsavel->name }}</div>
-                                    <div class="text-muted text-truncate" style="font-size: 0.7rem;">Criou: {{ Str::limit($tarefa->titulo, 30) }}</div>
+                                    <div class="text-muted text-truncate" style="font-size: 0.85rem;">Criou: {{ Str::limit($tarefa->titulo, 30) }}</div>
                                 </div>
                             </div>
                         </div>
@@ -202,7 +202,7 @@
                                         {{ Str::limit($tarefa->titulo, 35) }}
                                     </a>
                                 </div>
-                                <span class="badge bg-soft-secondary text-secondary" style="font-size: 0.6rem;">{{ $tarefa->status }}</span>
+                                <span class="badge bg-soft-secondary text-secondary" style="font-size: 0.75rem;">{{ $tarefa->status }}</span>
                             </div>
                         </div>
                     @empty
@@ -230,7 +230,7 @@
                             </div>
                             <div class="flex-grow-1 overflow-hidden">
                                 <div class="text-dark small fw-bold text-truncate">{{ Str::limit($compromisso->titulo, 30) }}</div>
-                                <div class="text-muted text-truncate" style="font-size: 0.65rem;">{{ $compromisso->local ?: 'Sem local' }}</div>
+                                <div class="text-muted text-truncate" style="font-size: 0.8rem;">{{ $compromisso->local ?: 'Sem local' }}</div>
                             </div>
                         </div>
                     @empty
@@ -348,7 +348,7 @@
                                 <div class="task-card-icon warning"><i class="bi bi-clock-history"></i></div>
                                 <div class="flex-grow-1">
                                     <div class="fw-bold text-dark small">{{ Str::limit($tarefa->titulo, 35) }}</div>
-                                    <div class="text-muted" style="font-size: 0.65rem;">{{ $tarefa->projeto->titulo ?? 'Sem projeto' }}</div>
+                                    <div class="text-muted" style="font-size: 0.8rem;">{{ $tarefa->projeto->titulo ?? 'Sem projeto' }}</div>
                                 </div>
                             </div>
                         @endforeach

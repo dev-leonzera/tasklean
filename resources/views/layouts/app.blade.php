@@ -17,6 +17,15 @@
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
+    <!-- Evitar Flash of Unstyled Content (FOUC) -->
+    <script>
+        const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        if (theme === 'dark') {
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    </script>
+
     <style>
         :root {
             --primary-color: #10b981;
@@ -40,6 +49,52 @@
             --glass-bg: rgba(255, 255, 255, 0.7);
             --glass-border: rgba(255, 255, 255, 0.3);
         }
+
+        [data-bs-theme="dark"] {
+            --light-bg: #0f172a;
+            --white: #1e293b;
+            --dark-text: #f8fafc;
+            --medium-text: #94a3b8;
+            --light-text: #64748b;
+            --border-color: #334155;
+            --card-shadow: 0 4px 6px -1px rgba(0,0,0,0.5), 0 2px 4px -2px rgba(0,0,0,0.5);
+            --card-shadow-hover: 0 20px 25px -5px rgba(0,0,0,0.5), 0 8px 10px -6px rgba(0,0,0,0.5);
+            --glass-bg: rgba(30, 41, 59, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            
+            /* Bootstrap Variable Mapping for Utility Classes */
+            --bs-body-bg: var(--light-bg);
+            --bs-body-color: var(--dark-text);
+            --bs-secondary-bg: var(--white);
+            --bs-tertiary-bg: var(--light-bg);
+            --bs-border-color: var(--border-color);
+            --bs-heading-color: var(--dark-text);
+            --bs-dark: var(--dark-text);
+            --bs-dark-rgb: 248, 250, 252;
+            --bs-light: var(--light-bg);
+            --bs-light-rgb: 15, 23, 42;
+            --bs-white: var(--white);
+            --bs-white-rgb: 30, 41, 59;
+            --bs-secondary-color: var(--medium-text);
+        }
+
+        /* Utility overrides to prevent hardcoded colors in Dark Mode */
+        [data-bs-theme="dark"] .bg-white:not(.metric-card .bg-white) { background-color: var(--white) !important; }
+        [data-bs-theme="dark"] .bg-light { background-color: var(--light-bg) !important; }
+        [data-bs-theme="dark"] .text-dark { color: var(--dark-text) !important; }
+        [data-bs-theme="dark"] .text-muted { color: #94a3b8 !important; }
+        [data-bs-theme="dark"] .text-primary { color: #34d399 !important; }
+        [data-bs-theme="dark"] .text-info { color: #38bdf8 !important; }
+        [data-bs-theme="dark"] .text-success { color: #4ade80 !important; }
+        [data-bs-theme="dark"] .text-warning { color: #fbbf24 !important; }
+        [data-bs-theme="dark"] .text-danger { color: #f87171 !important; }
+        [data-bs-theme="dark"] .border-light { border-color: var(--border-color) !important; }
+        [data-bs-theme="dark"] .table { --bs-table-bg: transparent; --bs-table-color: var(--dark-text); --bs-table-hover-bg: rgba(255,255,255,0.05); }
+        [data-bs-theme="dark"] .dropdown-menu { background-color: var(--white); border-color: var(--border-color); }
+        [data-bs-theme="dark"] .dropdown-item { color: var(--dark-text); }
+        [data-bs-theme="dark"] .dropdown-item:hover { background-color: var(--light-bg); color: var(--primary-color); }
+        [data-bs-theme="dark"] .dropdown-header { color: var(--light-text); }
+        [data-bs-theme="dark"] .dropdown-divider { border-color: var(--border-color); }
 
         * {
             font-family: 'Inter', sans-serif;
@@ -274,6 +329,11 @@
             background-color: var(--primary-light);
             color: var(--primary-dark);
             font-weight: 600;
+        }
+
+        [data-bs-theme="dark"] .sidebar-nav .nav-link.active {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: var(--primary-color);
         }
 
         .sidebar-nav .nav-link i {
@@ -583,6 +643,11 @@
                     
                     <!-- Header Icons -->
                     <div class="d-flex align-items-center">
+                        <!-- Dark Mode Toggle -->
+                        <div class="header-icon me-2 cursor-pointer" id="darkModeToggle" title="Alternar Dark Mode">
+                            <i class="bi bi-moon"></i>
+                        </div>
+
                         <!-- Notifications -->
                         <div class="dropdown me-2">
                             <div class="header-icon position-relative" id="notificationsDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Notificações">
@@ -990,6 +1055,26 @@
                 window.location.href = shortcuts[key];
             }
         });
+
+        // Dark Mode Toggle Logic
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const html = document.documentElement;
+        
+        // Sincronizar ícone com o tema atual (já definido no <head>)
+        if (html.getAttribute('data-bs-theme') === 'dark' && darkModeToggle) {
+            darkModeToggle.innerHTML = '<i class="bi bi-sun"></i>';
+        }
+        
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('click', () => {
+                const currentTheme = html.getAttribute('data-bs-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-bs-theme', newTheme);
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                darkModeToggle.innerHTML = newTheme === 'dark' ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon"></i>';
+            });
+        }
     </script>
     
     @yield('scripts')
