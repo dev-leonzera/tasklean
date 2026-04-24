@@ -960,6 +960,36 @@
                 });
         });
         @endif
+
+        // Global Keyboard Shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ignore if user is typing in an input, textarea, or contenteditable element
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) || e.target.isContentEditable) {
+                return;
+            }
+
+            // Ignore if any modifier key is pressed (except for specific shortcuts if needed)
+            if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) {
+                return;
+            }
+
+            const key = e.key.toLowerCase();
+            const shortcuts = {
+                'd': "{{ route('dashboard') }}",
+                'p': "{{ route('projetos.index') }}",
+                't': "{{ route('tarefas.index') }}",
+                'n': "{{ route('tarefas.create') }}",
+                'k': "{{ route('kanban') }}",
+                's': "{{ route('sprints') }}",
+                'e': "{{ route('times.index') }}",
+                'c': "{{ route('compromissos.index') }}",
+                'r': "{{ route('relatorios.index') }}",
+            };
+
+            if (shortcuts[key]) {
+                window.location.href = shortcuts[key];
+            }
+        });
     </script>
     
     @yield('scripts')

@@ -73,6 +73,41 @@
                                 <kbd>P</kbd>
                             </span>
                         </a>
+                        <a href="{{ route('kanban') }}" class="action-item">
+                            <i class="bi bi-kanban"></i>
+                            <span>Quadro Kanban</span>
+                            <span class="shortcut-hint">
+                                <kbd>K</kbd>
+                            </span>
+                        </a>
+                        <a href="{{ route('sprints') }}" class="action-item">
+                            <i class="bi bi-calendar-week"></i>
+                            <span>Sprints</span>
+                            <span class="shortcut-hint">
+                                <kbd>S</kbd>
+                            </span>
+                        </a>
+                        <a href="{{ route('times.index') }}" class="action-item">
+                            <i class="bi bi-people"></i>
+                            <span>Equipes</span>
+                            <span class="shortcut-hint">
+                                <kbd>E</kbd>
+                            </span>
+                        </a>
+                        <a href="{{ route('compromissos.index') }}" class="action-item">
+                            <i class="bi bi-calendar-event"></i>
+                            <span>Compromissos</span>
+                            <span class="shortcut-hint">
+                                <kbd>C</kbd>
+                            </span>
+                        </a>
+                        <a href="{{ route('relatorios.index') }}" class="action-item">
+                            <i class="bi bi-file-earmark-text"></i>
+                            <span>Relatórios</span>
+                            <span class="shortcut-hint">
+                                <kbd>R</kbd>
+                            </span>
+                        </a>
                     </div>
                 </div>
 
