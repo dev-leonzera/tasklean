@@ -6,6 +6,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -102,6 +104,42 @@ class User extends Authenticatable
     public function comentarios(): HasMany
     {
         return $this->hasMany(ComentarioTarefa::class);
+    }
+
+    /**
+     * Helpers de Role (Times)
+     */
+
+    public function times(): BelongsToMany
+    {
+        return $this->belongsToMany(Time::class, 'membros_time')
+            ->withPivot('regra')
+            ->withTimestamps();
+    }
+
+    public function isTeamOwner(): bool
+    {
+        // É dono se possuir um time ou se tiver a regra 'owner' em algum time
+        return Time::where('owner_id', $this->id)->exists() ||
+               $this->times()->wherePivot('regra', 'owner')->exists();
+    }
+
+    public function isTeamAdmin(): bool
+    {
+        return $this->times()->wherePivot('regra', 'admin')->exists();
+    }
+
+    public function getHighestRole(): string
+    {
+        if ($this->isTeamOwner()) {
+            return 'owner';
+        }
+
+        if ($this->isTeamAdmin()) {
+            return 'admin';
+        }
+
+        return 'member';
     }
 
     /**
