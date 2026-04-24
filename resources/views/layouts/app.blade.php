@@ -108,7 +108,7 @@
         body {
             background-color: var(--light-bg);
             color: var(--dark-text);
-            font-size: 14px;
+            font-size: 16px;
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
         }
@@ -202,7 +202,7 @@
         }
 
         .section-title {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             color: var(--dark-text);
             letter-spacing: -0.01em;
             display: flex;
@@ -266,7 +266,7 @@
             align-items: center;
             gap: 12px;
             margin-top: 4px;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             color: var(--light-text);
         }
 
@@ -280,7 +280,7 @@
             padding: 4px 10px;
             border-radius: 6px;
             font-weight: 600;
-            font-size: 0.7rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
             letter-spacing: 0.025em;
         }
