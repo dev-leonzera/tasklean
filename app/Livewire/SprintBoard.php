@@ -32,9 +32,9 @@ class SprintBoard extends Component
         $this->newSprintStart = Carbon::today()->format('Y-m-d');
         $this->newSprintEnd = Carbon::today()->addWeeks(2)->format('Y-m-d');
 
-        // Tentar encontrar o sprint ativo mais recente
+        // Tentar encontrar o sprint ativo mais recente em projetos acessíveis
         $lastSprint = Sprint::whereHas('projeto', function($q) {
-            $q->where('user_id', Auth::id());
+            $q->accessibleBy(Auth::user());
         })->orderBy('data_fim', 'desc')->first();
 
         if ($lastSprint) {
@@ -45,13 +45,13 @@ class SprintBoard extends Component
 
     public function getProjetosProperty()
     {
-        return Projeto::where('user_id', Auth::id())->ativos()->get();
+        return Projeto::accessibleBy(Auth::user())->ativos()->get();
     }
 
     public function getSprintsProperty()
     {
         $query = Sprint::whereHas('projeto', function($q) {
-            $q->where('user_id', Auth::id());
+            $q->accessibleBy(Auth::user());
         });
 
         if ($this->selectedProjetoId) {
@@ -82,7 +82,7 @@ class SprintBoard extends Component
 
     public function getAvailableTasksProperty()
     {
-        $query = Tarefa::where('user_id', Auth::id())
+        $query = Tarefa::accessibleBy(Auth::user())
             ->whereNull('sprint_id')
             ->where('status', '!=', 'concluida')
             ->with('projeto')
@@ -116,8 +116,36 @@ class SprintBoard extends Component
         $this->selectedSprintId = $sprint ? $sprint->id : null;
     }
 
+    /**
+     * Verifica se o usuário pode gerenciar sprints no projeto
+     */
+    public function canManageSprint($projetoId)
+    {
+        $projeto = Projeto::find($projetoId);
+        if (!$projeto) return false;
+
+        $user = Auth::user();
+        
+        // Dono do projeto
+        if ($projeto->user_id === $user->id) return true;
+
+        // Se tem time, dono ou admin do time
+        if ($projeto->time_id) {
+            if ($projeto->time->owner_id === $user->id) return true;
+            
+            $membro = $projeto->time->membros()->where('user_id', $user->id)->first();
+            return $membro && $membro->pivot->regra === 'admin';
+        }
+
+        return false;
+    }
+
     public function createSprint()
     {
+        if (!$this->canManageSprint($this->newSprintProjetoId)) {
+            abort(403, 'Apenas gestores ou coordenadores podem criar sprints.');
+        }
+
         $this->validate([
             'newSprintName' => 'required|string|max:255',
             'newSprintStart' => 'required|date',
@@ -153,10 +181,14 @@ class SprintBoard extends Component
 
     public function addTaskToSprint()
     {
-        $tarefa = Tarefa::where('user_id', Auth::id())->find($this->taskToAdd);
+        $tarefa = Tarefa::accessibleBy(Auth::user())->find($this->taskToAdd);
         
         if (!$tarefa || !$this->selectedSprintId) {
             return;
+        }
+
+        if (!$this->canManageSprint($tarefa->projeto_id)) {
+            abort(403, 'Apenas gestores ou coordenadores podem planejar a sprint.');
         }
 
         $tarefa->update([
@@ -172,9 +204,13 @@ class SprintBoard extends Component
 
     public function removeTaskFromSprint($taskId)
     {
-        $tarefa = Tarefa::where('user_id', Auth::id())->find($taskId);
+        $tarefa = Tarefa::accessibleBy(Auth::user())->find($taskId);
         
         if ($tarefa) {
+            if (!$this->canManageSprint($tarefa->projeto_id)) {
+                abort(403, 'Apenas gestores ou coordenadores podem planejar a sprint.');
+            }
+
             $tarefa->update(['sprint_id' => null]);
             session()->flash('success', 'Tarefa removida do sprint.');
         }
@@ -182,8 +218,14 @@ class SprintBoard extends Component
 
     public function markAsCompleted($taskId)
     {
-        $tarefa = Tarefa::where('user_id', Auth::id())->find($taskId);
+        $tarefa = Tarefa::accessibleBy(Auth::user())->find($taskId);
+        
         if ($tarefa) {
+            // Verificar se o usuário tem permissão para editar a tarefa (via Policy)
+            if (Auth::user()->cannot('update', $tarefa)) {
+                abort(403, 'Você não tem permissão para atualizar esta tarefa.');
+            }
+
             $tarefa->update(['status' => 'concluida']);
             session()->flash('success', 'Tarefa concluída!');
         }

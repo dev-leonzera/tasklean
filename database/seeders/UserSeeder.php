@@ -14,6 +14,16 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        // Criar usuário leonzera (o dono do sistema)
+        User::create([
+            'name' => 'Leon Zera',
+            'email' => 'leon@leonzera.com',
+            'username' => 'leonzera',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+            'idioma' => 'pt-BR',
+        ]);
+
         // Criar usuário administrador padrão
         User::create([
             'name' => 'Administrador',
