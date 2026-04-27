@@ -69,8 +69,12 @@ Route::middleware('auth')->group(function () {
 Route::post('logout', App\Livewire\Actions\Logout::class)
     ->name('logout');
 
-// Rotas protegidas por autenticação
 Route::middleware('auth')->group(function () {
+    Route::get('/onboarding', App\Livewire\Onboarding\Wizard::class)->name('onboarding.wizard');
+});
+
+// Rotas protegidas por autenticação e onboarding
+Route::middleware(['auth', 'onboarding.completed'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/check-notifications', [App\Http\Controllers\DashboardController::class, 'checkNotifications'])->name('dashboard.check-notifications');
     Route::post('/dashboard/mark-all-read', [App\Http\Controllers\DashboardController::class, 'markAllAsRead'])->name('dashboard.mark-all-read');
@@ -119,7 +123,7 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'onboarding.completed'])->group(function () {
     Route::get('/relatorios', [RelatorioController::class, 'index'])->name('relatorios.index');
     Route::get('/relatorios/projetos', [RelatorioController::class, 'projetos'])->name('relatorios.projetos');
     Route::get('/relatorios/tarefas', [RelatorioController::class, 'tarefas'])->name('relatorios.tarefas');
@@ -131,7 +135,7 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'onboarding.completed'])->group(function () {
     Route::resource('projetos', ProjetoController::class);
 
     // Rotas específicas para projetos
@@ -145,7 +149,7 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'onboarding.completed'])->group(function () {
     Route::resource('tarefas', TarefaController::class);
 
     // Rotas específicas para tarefas
@@ -159,7 +163,7 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'onboarding.completed'])->group(function () {
     Route::resource('compromissos', CompromissoController::class);
 
     // Rotas específicas para compromissos
@@ -175,7 +179,7 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'onboarding.completed'])->group(function () {
     Route::resource('times', TimeController::class)->parameters([
         'times' => 'time:slug'
     ]);

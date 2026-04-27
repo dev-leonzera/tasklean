@@ -32,6 +32,7 @@ class User extends Authenticatable
         'timezone',
         'date_format',
         'push_settings',
+        'onboarding_completed_at',
     ];
 
     /**
@@ -55,6 +56,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'push_settings' => 'array',
+            'onboarding_completed_at' => 'datetime',
         ];
     }
 
