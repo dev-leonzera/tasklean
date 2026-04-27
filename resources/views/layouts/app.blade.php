@@ -602,6 +602,17 @@
                     <i class="bi bi-gear"></i> Configurações
                 </a>
             </li>
+
+            @if(auth()->user()->isAdmin())
+            <li class="nav-item mt-4">
+                <div class="px-4 py-2 small text-muted text-uppercase fw-bold" style="font-size: 0.65rem;">Administração</div>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.*') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
+                    <i class="bi bi-shield-lock"></i> Painel Admin
+                </a>
+            </li>
+            @endif
         </ul>
         
         <!-- User info at bottom -->
@@ -691,6 +702,13 @@
                                         <i class="bi bi-gear me-2"></i> Configurações
                                     </a>
                                 </li>
+                                @if(auth()->user()->isAdmin())
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('admin.dashboard') }}">
+                                        <i class="bi bi-shield-lock me-2"></i> Painel Admin
+                                    </a>
+                                </li>
+                                @endif
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form method="POST" action="{{ route('logout') }}" class="d-inline">
@@ -706,6 +724,17 @@
                 </div>
             </div>
         </div>
+
+        <!-- Impersonation Banner -->
+        @if(session()->has('impersonator_id'))
+        <div class="bg-warning text-dark p-2 text-center fw-bold shadow-sm" style="position: sticky; top: 73px; z-index: 998;">
+            <i class="bi bi-person-bounding-box me-2"></i>
+            Você está logado como {{ auth()->user()->name }}. 
+            <a href="{{ route('admin.users.stop-impersonating') }}" class="btn btn-sm btn-dark ms-3 rounded-pill px-3">
+                Voltar ao Admin
+            </a>
+        </div>
+        @endif
 
         <!-- Page Content -->
         <div class="p-4">
