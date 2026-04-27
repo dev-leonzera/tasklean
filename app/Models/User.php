@@ -33,6 +33,8 @@ class User extends Authenticatable
         'date_format',
         'push_settings',
         'onboarding_completed_at',
+        'is_admin',
+        'banned_at',
     ];
 
     /**
@@ -57,6 +59,8 @@ class User extends Authenticatable
             'password' => 'hashed',
             'push_settings' => 'array',
             'onboarding_completed_at' => 'datetime',
+            'is_admin' => 'boolean',
+            'banned_at' => 'datetime',
         ];
     }
 
@@ -142,6 +146,11 @@ class User extends Authenticatable
         }
 
         return 'member';
+    }
+
+    public function isAdmin(): bool
+    {
+        return (bool) $this->is_admin;
     }
 
     /**

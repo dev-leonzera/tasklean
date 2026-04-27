@@ -189,3 +189,27 @@ Route::middleware(['auth', 'onboarding.completed'])->group(function () {
     Route::delete('times/{time:slug}/membros/{user}', [MembroTimeController::class, 'destroy'])->name('times.membros.destroy');
     Route::patch('times/{time:slug}/membros/{user}/regra', [MembroTimeController::class, 'updateRegra'])->name('times.membros.update-regra');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Rotas do Painel Administrativo (Apenas Super Admins)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
+    
+    // Gestão de Usuários
+    Route::get('/users', [App\Http\Controllers\Admin\AdminUserController::class, 'index'])->name('users.index');
+    Route::post('/users/{user}/ban', [App\Http\Controllers\Admin\AdminUserController::class, 'ban'])->name('users.ban');
+    Route::post('/users/{user}/impersonate', [App\Http\Controllers\Admin\AdminUserController::class, 'impersonate'])->name('users.impersonate');
+    
+    // Gestão de Assinaturas
+    Route::get('/subscriptions', [App\Http\Controllers\Admin\AdminSubscriptionController::class, 'index'])->name('subscriptions.index');
+    
+    // Gestão de Times
+    Route::get('/teams', [App\Http\Controllers\Admin\AdminTeamController::class, 'index'])->name('teams.index');
+});
+
+// Rota para parar impersonação (acessível por qualquer usuário autenticado que esteja sendo impersonado)
+Route::middleware(['auth'])->get('/admin/stop-impersonating', [App\Http\Controllers\Admin\AdminUserController::class, 'stopImpersonating'])->name('admin.users.stop-impersonating');
