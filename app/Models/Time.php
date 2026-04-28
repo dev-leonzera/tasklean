@@ -45,4 +45,11 @@ class Time extends Model
     {
         return $this->hasMany(Projeto::class);
     }
+    /**
+     * Convites do time.
+     */
+    public function convites(): HasMany
+    {
+        return $this->hasMany(ConviteTime::class);
+    }
 }
