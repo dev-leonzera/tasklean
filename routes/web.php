@@ -54,6 +54,8 @@ Route::middleware('guest')->group(function () {
     Route::get('reset-password/{token}', ResetPassword::class)->name('password.reset');
 });
 
+Route::get('join/team/{token}', App\Livewire\Auth\JoinTeam::class)->name('team.join');
+
 Route::middleware('auth')->group(function () {
     Route::get('verify-email', VerifyEmail::class)
         ->name('verification.notice');

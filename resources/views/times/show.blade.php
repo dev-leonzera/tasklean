@@ -84,11 +84,25 @@
         <!-- Lista de Membros -->
         <div class="col-xl-8">
             <div class="card card-premium">
-                <div class="card-header bg-transparent border-0 p-4 pb-0">
-                    <h5 class="mb-0">Membros da Equipe</h5>
+                <div class="card-header bg-transparent border-0 p-4 pb-0 d-flex justify-content-between align-items-center">
+                    <ul class="nav nav-tabs border-0" id="teamTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active fw-bold border-0 bg-transparent px-0 me-4" id="members-tab" data-bs-toggle="tab" data-bs-target="#members" type="button" role="tab">
+                                Membros da Equipe
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link fw-bold border-0 bg-transparent px-0" id="invitations-tab" data-bs-toggle="tab" data-bs-target="#invitations" type="button" role="tab">
+                                Gerenciar Convites
+                            </button>
+                        </li>
+                    </ul>
                 </div>
-                <div class="card-body p-4">
-                    <div class="table-responsive">
+                <div class="card-body p-4 pt-0">
+                    <div class="tab-content" id="teamTabsContent">
+                        <!-- Aba de Membros -->
+                        <div class="tab-pane fade show active" id="members" role="tabpanel">
+                            <div class="table-responsive mt-3">
                         <table class="table table-hover align-middle">
                             <thead class="bg-light">
                                 <tr>
@@ -156,6 +170,15 @@
                                 @endforeach
                             </tbody>
                         </table>
+                        </div>
+                        </div>
+
+                        <!-- Aba de Convites -->
+                        <div class="tab-pane fade" id="invitations" role="tabpanel">
+                            <div class="mt-4">
+                                @livewire('times.manage-invitations', ['time' => $time])
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -213,5 +236,8 @@
 
 <style>
     .extra-small { font-size: 0.75rem; }
+    .nav-tabs .nav-link { color: var(--text-muted); border-bottom: 2px solid transparent !important; transition: all 0.3s ease; }
+    .nav-tabs .nav-link.active { color: var(--primary-color) !important; border-bottom: 2px solid var(--primary-color) !important; }
+    .nav-tabs .nav-link:hover:not(.active) { color: var(--primary-color); opacity: 0.8; }
 </style>
 @endsection
