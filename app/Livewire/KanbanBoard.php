@@ -30,12 +30,12 @@ class KanbanBoard extends Component
     #[On('tarefa-movida')]
     public function moverTarefa($tarefaId, $novoStatus)
     {
-        $tarefa = Tarefa::where('user_id', Auth::id())->find($tarefaId);
+        $tarefa = Tarefa::accessibleBy(Auth::user())->find($tarefaId);
         
         if ($tarefa) {
             $tarefa->update(['status' => $novoStatus]);
             
-            // Emitir evento para notificar sobre a mudança
+            // Emitir evento local para notificar sobre a mudança
             $this->dispatch('tarefa-atualizada', [
                 'tarefa_id' => $tarefaId,
                 'novo_status' => $novoStatus,
@@ -44,11 +44,19 @@ class KanbanBoard extends Component
         }
     }
 
+    #[On('tarefa-criada-realtime')]
+    #[On('tarefa-atualizada-realtime')]
+    #[On('tarefa-excluida-realtime')]
+    public function refreshTarefas()
+    {
+        // Apenas recarrega a renderização
+    }
+
     public function render()
     {
-        $projetos = Projeto::where('user_id', Auth::id())->ativos()->get();
+        $projetos = Projeto::accessibleBy(Auth::user())->ativos()->get();
         
-        $query = Tarefa::where('user_id', Auth::id())->with(['projeto', 'responsavel']);
+        $query = Tarefa::accessibleBy(Auth::user())->with(['projeto', 'responsavel']);
         
         if ($this->projetoId) {
             $query->where('projeto_id', $this->projetoId);

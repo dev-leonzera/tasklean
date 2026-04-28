@@ -7,6 +7,7 @@ use App\Models\Projeto;
 use App\Models\Sprint;
 use App\Models\UserSettings;
 use Livewire\Component;
+use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
@@ -229,6 +230,14 @@ class SprintBoard extends Component
             $tarefa->update(['status' => 'concluida']);
             session()->flash('success', 'Tarefa concluída!');
         }
+    }
+
+    #[On('tarefa-criada-realtime')]
+    #[On('tarefa-atualizada-realtime')]
+    #[On('tarefa-excluida-realtime')]
+    public function refreshTarefas()
+    {
+        // Apenas recarrega a renderização
     }
 
     public function render()

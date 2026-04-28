@@ -107,6 +107,11 @@ class User extends Authenticatable
         return $this->hasMany(ParticipanteCompromisso::class);
     }
 
+    public function ownedTimes(): HasMany
+    {
+        return $this->hasMany(Time::class, 'owner_id');
+    }
+
     public function comentarios(): HasMany
     {
         return $this->hasMany(ComentarioTarefa::class);

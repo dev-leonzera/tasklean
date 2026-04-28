@@ -127,6 +127,9 @@
 
         {{ $slot }}
 
+        <livewire:realtime-manager />
+        <flux:toast />
+
         @fluxScripts
     </body>
 </html>

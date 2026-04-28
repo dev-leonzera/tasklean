@@ -776,6 +776,9 @@
     <!-- Command Menu Component -->
     <livewire:command-menu />
 
+    <!-- Real-time Event Manager -->
+    <livewire:realtime-manager />
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -899,7 +902,7 @@
         });
 
         // Notifications logic
-        unreadNotifications = [];
+        let unreadNotifications = [];
         function updateNotificationsDropdown(notifications) {
             const container = document.getElementById('notifications-list');
             const countBadge = document.getElementById('notification-count');
@@ -1110,6 +1113,59 @@
                 darkModeToggle.innerHTML = newTheme === 'dark' ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon"></i>';
             });
         }
+
+        // Listener para notificações em tempo real (RealtimeManager)
+        window.addEventListener('nova-notificacao-realtime', function(event) {
+            const detail = event.detail;
+            const notification = Array.isArray(detail) ? detail[0] : detail;
+            
+            if (!notification) return;
+
+            // 1. Adicionar ao dropdown do sino
+            if (typeof addNotificationToDropdown === 'function') {
+                addNotificationToDropdown(notification);
+            }
+
+            // 2. Criar o toast visual na tela
+            const toastContainer = document.getElementById('realtime-notifications');
+            if (toastContainer) {
+                const toastId = 'toast-' + Math.floor(Math.random() * 1000000);
+                const iconMap = {
+                    'success': 'bi-check-circle text-success',
+                    'warning': 'bi-exclamation-triangle text-warning',
+                    'danger': 'bi-x-circle text-danger',
+                    'info': 'bi-info-circle text-info'
+                };
+                const icon = iconMap[notification.type] || 'bi-bell';
+
+                let actionHtml = '';
+                if (notification.action) {
+                    const btnClass = notification.action.class || 'btn-primary';
+                    actionHtml = '<div class="mt-2"><a href="' + notification.action.url + '" class="btn btn-sm ' + btnClass + '">' + notification.action.text + '</a></div>';
+                }
+
+                const toastHtml = 
+                    '<div id="' + toastId + '" class="toast show mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="8000">' +
+                        '<div class="toast-header bg-dark text-white">' +
+                            '<i class="bi ' + icon + ' me-2"></i>' +
+                            '<strong class="me-auto">' + notification.title + '</strong>' +
+                            '<small>' + new Date().toLocaleTimeString() + '</small>' +
+                            '<button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>' +
+                        '</div>' +
+                        '<div class="toast-body">' +
+                            notification.message +
+                            actionHtml +
+                        '</div>' +
+                    '</div>';
+
+                toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+                const toastElement = document.getElementById(toastId);
+                if (toastElement && typeof bootstrap !== 'undefined') {
+                    const bsToast = new bootstrap.Toast(toastElement);
+                    bsToast.show();
+                }
+            }
+        });
     </script>
     
     @yield('scripts')
