@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Events\TarefaCriada;
+use App\Events\TarefaAtualizada;
+use App\Events\TarefaExcluida;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -194,5 +197,25 @@ class Tarefa extends Model
             ->orWhereHas('projeto', function($q) use ($user) {
                 $q->accessibleBy($user);
             });
+    }
+
+    /**
+     * Boot do modelo para disparar eventos real-time
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($tarefa) {
+            TarefaCriada::dispatch($tarefa);
+        });
+
+        static::updated(function ($tarefa) {
+            TarefaAtualizada::dispatch($tarefa);
+        });
+
+        static::deleted(function ($tarefa) {
+            TarefaExcluida::dispatch($tarefa);
+        });
     }
 }
